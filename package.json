@@ -1,0 +1,76 @@
+{
+    "name": "@wallet-test-framework/framework",
+    "version": "0.1.0",
+    "description": "a suite of tests for Ethereum wallets",
+    "license": "MIT",
+    "type": "module",
+    "exports": {
+        ".": {
+            "node": "./dist/server/index.js",
+            "browser": "./dist/client/index.js"
+        },
+        "./worker_chain.js": {
+            "browser": "./dist/client/worker_chain.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "fmt": "prettier --write .",
+        "build:client": "node ./client/Build.js && tsc -d --emitDeclarationOnly -p client",
+        "build:server": "node ./server/Build.js && tsc -d --emitDeclarationOnly -p server",
+        "build": "npm run build:client && npm run build:server",
+        "test": "prettier --check . && eslint . && npm run build"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/wallet-test-framework/framework.git"
+    },
+    "contributors": [
+        {
+            "name": "Nikki Gaudreau",
+            "url": "https://twitter.com/gaudren_",
+            "email": "nikki@binarycake.ca"
+        },
+        {
+            "name": "Sam Wilson",
+            "url": "https://twitter.com/_SamWilsn_",
+            "email": "sam@binarycake.ca"
+        }
+    ],
+    "bugs": {
+        "url": "https://github.com/wallet-test-framework/framework/issues"
+    },
+    "homepage": "https://wtf.allwallet.dev/",
+    "devDependencies": {
+        "@jgoz/esbuild-plugin-typecheck": "^3.0.2",
+        "@trivago/prettier-plugin-sort-imports": "^4.1.1",
+        "@tsconfig/recommended": "^1.0.2",
+        "@types/cors": "^2.8.13",
+        "@types/express": "^4.17.17",
+        "@types/mocha": "^10.0.1",
+        "@types/serve-static": "^1.15.1",
+        "@types/ws": "^8.5.4",
+        "@typescript-eslint/eslint-plugin": "5.57.1",
+        "@typescript-eslint/parser": "^5.57.1",
+        "assert": "^2.0.0",
+        "esbuild": "0.17.15",
+        "eslint": "8.37.0",
+        "eslint-config-prettier": "^8.8.0",
+        "ethers": "^6.3.0",
+        "ganache": "^7.7.7",
+        "mocha": "^10.2.0",
+        "prettier": "2.8.7",
+        "process": "^0.11.10",
+        "typescript": "^5.0.4"
+    },
+    "dependencies": {
+        "cors": "^2.8.5",
+        "express": "^4.18.2",
+        "lru-cache": "^8.0.5",
+        "raw-body": "^2.5.2",
+        "serve-static": "^1.15.0",
+        "ws": "^8.13.0"
+    }
+}
