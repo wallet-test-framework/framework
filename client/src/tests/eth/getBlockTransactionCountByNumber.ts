@@ -1,7 +1,7 @@
-import { blockchain, wallet } from "../tests";
+import { blockchain, wallet } from "../../tests";
 import assert from "assert";
 
-describe("getBlockTransactionCountByHash", () => {
+describe("getBlockTransactionCountByNumber", () => {
     it("returns zero for empty block", async () => {
         if (!blockchain || !wallet) {
             throw "not ready";
@@ -11,14 +11,10 @@ describe("getBlockTransactionCountByHash", () => {
 
         await blockchain.send("evm_mine", [{ blocks: 1 }]);
 
-        const blockHash = (await blockchain.getBlock(blockNumber + 1))?.hash;
-        if (!blockHash) {
-            throw "no block hash";
-        }
-
-        const count = await wallet.send("eth_getBlockTransactionCountByHash", [
-            blockHash,
-        ]);
+        const count = await wallet.send(
+            "eth_getBlockTransactionCountByNumber",
+            [blockNumber + 1]
+        );
         if (!count) {
             throw "no block";
         }
@@ -59,34 +55,28 @@ describe("getBlockTransactionCountByHash", () => {
         await blockchain.send("evm_mine", [{ blocks: 1 }]);
         const mined = await response.wait(1);
 
-        const blockHash0 = (await blockchain.getBlock(blockNumber + 1))?.hash;
-        if (!blockHash0) {
-            throw "no block hash";
-        }
-
-        const blockHash1 = (await blockchain.getBlock(blockNumber + 2))?.hash;
-        if (!blockHash1) {
-            throw "no block hash";
-        }
-
         assert.equal(
-            mined?.blockHash,
-            blockHash1,
-            `transaction block (${mined?.blockHash}) matches mined block (${blockHash1})`
+            mined?.blockNumber,
+            blockNumber + 2,
+            `transaction block (${mined?.blockNumber}) matches mined block (${
+                blockNumber + 2
+            })`
         );
 
-        const count0 = await wallet.send("eth_getBlockTransactionCountByHash", [
-            blockHash0,
-        ]);
+        const count0 = await wallet.send(
+            "eth_getBlockTransactionCountByNumber",
+            [blockNumber + 1]
+        );
         if (!count0) {
             throw "no block";
         }
 
         assert.equal(parseInt(count0, 16), 1);
 
-        const count1 = await wallet.send("eth_getBlockTransactionCountByHash", [
-            blockHash1,
-        ]);
+        const count1 = await wallet.send(
+            "eth_getBlockTransactionCountByNumber",
+            [blockNumber + 2]
+        );
         if (!count1) {
             throw "no block";
         }
@@ -98,9 +88,12 @@ describe("getBlockTransactionCountByHash", () => {
             throw "not ready";
         }
 
-        const count = await wallet.send("eth_getBlockTransactionCountByHash", [
-            "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-        ]);
+        const count = await wallet.send(
+            "eth_getBlockTransactionCountByNumber",
+            [
+                "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            ]
+        );
 
         assert.equal(count, null);
     });
