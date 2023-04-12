@@ -17,14 +17,14 @@ export async function run(
         ui: "bdd",
         timeout: 10 * 60 * 1000,
     });
-    await import("./tests/getBlockByHash");
-    await import("./tests/getBlockByNumber");
-    await import("./tests/getBlockTransactionCountByHash");
-    await import("./tests/getBlockTransactionCountByNumber");
-    await import("./tests/chainId");
-    await import("./tests/blockNumber");
-    await import("./tests/getBalance");
-    await import("./tests/getTransactionByHash");
+    await import("./tests/eth/getBlockByHash");
+    await import("./tests/eth/getBlockByNumber");
+    await import("./tests/eth/getBlockTransactionCountByHash");
+    await import("./tests/eth/getBlockTransactionCountByNumber");
+    await import("./tests/eth/chainId");
+    await import("./tests/eth/blockNumber");
+    await import("./tests/eth/getBalance");
+    await import("./tests/eth/getTransactionByHash");
 
     mocha.run();
 }

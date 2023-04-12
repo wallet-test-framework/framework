@@ -1,7 +1,7 @@
-import { blockchain, wallet } from "../tests";
+import { blockchain, wallet } from "../../tests";
 import assert from "assert";
 
-describe("getBlockByNumber", () => {
+describe("getBlockByHash", () => {
     it("returns the mined block", async () => {
         if (!blockchain || !wallet) {
             throw "not ready";
@@ -21,12 +21,17 @@ describe("getBlockByNumber", () => {
         await blockchain.send("evm_mine", [{ blocks: 1 }]);
         await response.wait(1);
 
-        const walletBlockByNumber = await wallet.getBlock(blockNumber + 1);
-        if (!walletBlockByNumber) {
+        const blockHash = (await blockchain.getBlock(blockNumber + 1))?.hash;
+        if (!blockHash) {
+            throw "no block hash";
+        }
+
+        const walletBlockByHash = await wallet.getBlock(blockHash);
+        if (!walletBlockByHash) {
             throw "no block";
         }
 
-        assert.equal(walletBlockByNumber.transactions[0], response.hash);
+        assert.equal(walletBlockByHash.transactions[0], response.hash);
     });
 
     it("behaves well when the block doesn't exist", async () => {
@@ -34,11 +39,11 @@ describe("getBlockByNumber", () => {
             throw "not ready";
         }
 
-        const blockNumber =
-            "0x0000000000000f00000000000000000000000000000000000000000000000000";
+        const blockHash =
+            "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-        const walletBlockByNumber = await wallet.getBlock(blockNumber);
+        const walletBlockByHash = await wallet.getBlock(blockHash);
 
-        assert.equal(walletBlockByNumber, null);
+        assert.equal(walletBlockByHash, null);
     });
 });

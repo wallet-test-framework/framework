@@ -1,4 +1,4 @@
-import { blockchain, wallet } from "../tests";
+import { blockchain, wallet } from "../../tests";
 import assert from "assert";
 
 describe("chainId", () => {
