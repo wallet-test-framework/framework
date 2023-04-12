@@ -3,6 +3,8 @@ import { ethers } from "ethers";
 import Ganache from "ganache";
 import "mocha/mocha.css";
 
+const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
 declare global {
     interface Window {
         ethereum: ethers.Eip1193Provider;
@@ -78,11 +80,22 @@ async function main() {
                 },
             ]);
 
-            await wallet.send("wallet_switchEthereumChain", [
-                {
-                    chainId: "0x" + network.chainId.toString(16),
-                },
-            ]);
+            let switched = false;
+            do {
+                try {
+                    await wallet.send("wallet_switchEthereumChain", [
+                        {
+                            chainId: "0x" + network.chainId.toString(16),
+                        },
+                    ]);
+                    switched = true;
+                } catch (e: any) {
+                    if (e?.error?.code !== 4902) {
+                        throw e;
+                    }
+                    await delay(1000);
+                }
+            } while (!switched);
 
             await wallet.send("eth_requestAccounts", []);
 
