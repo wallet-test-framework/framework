@@ -17,6 +17,9 @@ export async function run(
         ui: "bdd",
         timeout: 10 * 60 * 1000,
     });
+    await import("./tests/chainId");
+    await import("./tests/blockNumber");
     await import("./tests/getBalance");
+
     mocha.run();
 }
