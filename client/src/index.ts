@@ -1,6 +1,5 @@
 import * as tests from "./tests";
 import { ethers } from "ethers";
-import Ganache from "ganache";
 import "mocha/mocha.css";
 
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
@@ -8,6 +7,29 @@ const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 declare global {
     interface Window {
         ethereum: ethers.Eip1193Provider;
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Request = { method: string; params?: Array<any> | Record<string, any> };
+
+class GanacheWorkerProvider implements ethers.Eip1193Provider {
+    private worker: Worker;
+
+    constructor(options: object) {
+        const url = new URL("./worker_chain.js", import.meta.url);
+        this.worker = new Worker(url);
+        this.worker.postMessage(options);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public request(request: Request): Promise<any> {
+        return new Promise((res, rej) => {
+            const channel = new MessageChannel();
+            channel.port1.onmessage = (evt) => res(evt.data);
+            channel.port1.onmessageerror = (evt) => rej(evt.data);
+            this.worker.postMessage(request, [channel.port2]);
+        });
     }
 }
 
@@ -28,7 +50,7 @@ async function main() {
         const chainId = Math.floor(Math.random() * 32767) + 32767;
         const options = { chainId: chainId };
         const blockchain = new ethers.BrowserProvider(
-            Ganache.provider(options)
+            new GanacheWorkerProvider(options)
         );
 
         const network = await blockchain.getNetwork();
@@ -89,11 +111,17 @@ async function main() {
                         },
                     ]);
                     switched = true;
-                } catch (e: any) {
-                    if (e?.error?.code !== 4902) {
-                        throw e;
+                } catch (e: unknown) {
+                    if (e instanceof Error && "error" in e) {
+                        if (e.error instanceof Object && "code" in e.error) {
+                            if (e.error.code === 4902) {
+                                await delay(1000);
+                                continue;
+                            }
+                        }
                     }
-                    await delay(1000);
+
+                    throw e;
                 }
             } while (!switched);
 

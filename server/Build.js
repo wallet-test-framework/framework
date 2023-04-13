@@ -13,6 +13,7 @@ const options = {
     outbase: "src",
     outdir: "../dist/server/",
     target: "es2020",
+    format: "esm",
     platform: "node",
     minify: true,
     sourcemap: true,
