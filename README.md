@@ -4,6 +4,11 @@
 
 ## Building
 
+To install the dependencies:
+```bash
+npm install
+```
+
 To compile the TypeScript into JavaScript and create the relevant bundles:
 
 ```bash
