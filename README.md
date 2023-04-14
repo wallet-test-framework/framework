@@ -5,6 +5,7 @@
 ## Building
 
 To install the dependencies:
+
 ```bash
 npm install
 ```
