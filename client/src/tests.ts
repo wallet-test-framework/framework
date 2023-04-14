@@ -18,6 +18,8 @@ export async function run(
         timeout: 10 * 60 * 1000,
     });
     await import("./tests/getBlockByHash");
+    await import("./tests/getBlockByNumber");
+    await import("./tests/getBlockTransactionCountByHash");
     await import("./tests/chainId");
     await import("./tests/blockNumber");
     await import("./tests/getBalance");
