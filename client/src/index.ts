@@ -53,6 +53,8 @@ async function main() {
             new GanacheWorkerProvider(options)
         );
 
+        await blockchain.send("miner_stop", []);
+
         const network = await blockchain.getNetwork();
 
         const wallet = new ethers.BrowserProvider(window.ethereum, "any");
