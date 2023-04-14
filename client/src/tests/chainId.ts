@@ -10,10 +10,6 @@ describe("chainId", () => {
         const walletChainId = (await wallet.getNetwork()).chainId;
         const ganacheChainId = (await wallet.getNetwork()).chainId;
 
-        assert.equal(
-            walletChainId.toString(),
-            ganacheChainId.toString(),
-            "chainId"
-        );
+        assert.equal(walletChainId.toString(), ganacheChainId.toString());
     });
 });

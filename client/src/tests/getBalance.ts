@@ -9,7 +9,6 @@ describe("getBalance", () => {
 
         const src = (await blockchain.listAccounts())[0];
         const dest = (await wallet.listAccounts())[0];
-        console.log(await wallet.listAccounts());
 
         const balance = "0x100000000000000000000";
         await blockchain.send("evm_setAccountBalance", [src.address, balance]);
