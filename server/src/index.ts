@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { Connections } from "./connections.js";
 import cors from "cors";
 import express from "express";

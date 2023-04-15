@@ -13,6 +13,9 @@
             "browser": "./dist/client/worker_chain.js"
         }
     },
+    "bin": {
+        "wtfd": "./dist/server/index.js"
+    },
     "files": [
         "dist"
     ],
