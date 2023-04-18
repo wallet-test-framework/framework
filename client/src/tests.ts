@@ -20,6 +20,7 @@ export async function run(
     await import("./tests/getBlockByHash");
     await import("./tests/getBlockByNumber");
     await import("./tests/getBlockTransactionCountByHash");
+    await import("./tests/getBlockTransactionCountByNumber");
     await import("./tests/chainId");
     await import("./tests/blockNumber");
     await import("./tests/getBalance");
