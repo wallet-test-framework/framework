@@ -7,9 +7,6 @@ describe("getBlockTransactionCountByHash", () => {
             throw "not ready";
         }
 
-        const src = (await blockchain.listAccounts())[0];
-        const dest = (await wallet.listAccounts())[0];
-
         const blockNumber = await blockchain.getBlockNumber();
 
         await blockchain.send("evm_mine", [{ blocks: 1 }]);
@@ -60,7 +57,7 @@ describe("getBlockTransactionCountByHash", () => {
         });
 
         await blockchain.send("evm_mine", [{ blocks: 1 }]);
-        await response.wait(1);
+        const mined = await response.wait(1);
 
         const blockHash0 = (await blockchain.getBlock(blockNumber + 1))?.hash;
         if (!blockHash0) {
@@ -71,6 +68,12 @@ describe("getBlockTransactionCountByHash", () => {
         if (!blockHash1) {
             throw "no block hash";
         }
+
+        assert.equal(
+            mined?.blockHash,
+            blockHash1,
+            `transaction block (${mined?.blockHash}) matches mined block (${blockHash1})`
+        );
 
         const count0 = await wallet.send("eth_getBlockTransactionCountByHash", [
             blockHash0,
