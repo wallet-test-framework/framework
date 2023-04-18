@@ -2,6 +2,32 @@ import { blockchain, wallet } from "../tests";
 import assert from "assert";
 
 describe("getBlockTransactionCountByHash", () => {
+    it("returns zero for empty block", async () => {
+        if (!blockchain || !wallet) {
+            throw "not ready";
+        }
+
+        const src = (await blockchain.listAccounts())[0];
+        const dest = (await wallet.listAccounts())[0];
+
+        const blockNumber = await blockchain.getBlockNumber();
+
+        await blockchain.send("evm_mine", [{ blocks: 1 }]);
+
+        const blockHash = (await blockchain.getBlock(blockNumber + 1))?.hash;
+        if (!blockHash) {
+            throw "no block hash";
+        }
+
+        const count = await wallet.send("eth_getBlockTransactionCountByHash", [
+            blockHash,
+        ]);
+        if (!count) {
+            throw "no block";
+        }
+
+        assert.equal(parseInt(count, 16), 0);
+    });
     it("returns the correct count of transactions", async () => {
         if (!blockchain || !wallet) {
             throw "not ready";
@@ -50,7 +76,6 @@ describe("getBlockTransactionCountByHash", () => {
             blockHash0,
         ]);
         if (!count0) {
-            console.log(count0);
             throw "no block";
         }
 
@@ -64,5 +89,16 @@ describe("getBlockTransactionCountByHash", () => {
         }
 
         assert.equal(parseInt(count1, 16), 2);
+    });
+    it("behaves when given a nonexistant block", async () => {
+        if (!blockchain || !wallet) {
+            throw "not ready";
+        }
+
+        const count = await wallet.send("eth_getBlockTransactionCountByHash", [
+            "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        ]);
+
+        assert.equal(count, null);
     });
 });
