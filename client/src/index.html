@@ -4,27 +4,48 @@
         <meta charset="utf-8" />
         <title>Wallet Test</title>
         <link rel="stylesheet" href="/index.css" />
+        <style>
+            body {
+                display: flex;
+                flex-direction: column;
+                gap: 3em;
+            }
+            body,
+            html {
+                height: 100%;
+                overflow: hidden;
+            }
+            #mocha {
+                flex: 1;
+                overflow-x: hidden;
+                overflow-y: scroll;
+            }
+        </style>
     </head>
 
     <body>
-        <h1>Wallet Test Framework</h1>
-        <p>
-            This page will run your Ethereum wallet through a set of tests that
-            check against the
-            <a
-                href="https://ethereum.github.io/execution-apis/api-documentation/"
-                >JSON-RPC specification</a
-            >. This is a work in progress, and tests are being added regularly.
-        </p>
-        <p>
-            Make sure you have an Ethereum wallet configured and click the
-            "connect" link to get started.
-        </p>
-        <p>
-            <strong>Do not use an account with real assets!</strong> While the
-            tests use a simulated blockchain, it's safer to not take any risks.
-        </p>
-        <a id="connect" href="#">Connect</a>
+        <div id="welcome">
+            <h1>Wallet Test Framework</h1>
+            <p>
+                This page will run your Ethereum wallet through a set of tests
+                that check against the
+                <a
+                    href="https://ethereum.github.io/execution-apis/api-documentation/"
+                    >JSON-RPC specification</a
+                >. This is a work in progress, and tests are being added
+                regularly.
+            </p>
+            <p>
+                Make sure you have an Ethereum wallet configured and click the
+                "connect" link to get started.
+            </p>
+            <p>
+                <strong>Do not use an account with real assets!</strong> While
+                the tests use a simulated blockchain, it's safer to not take any
+                risks.
+            </p>
+            <a id="connect" href="#">Connect</a>
+        </div>
         <div id="mocha"></div>
         <script type="module" src="/index.js"></script>
     </body>
