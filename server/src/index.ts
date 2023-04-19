@@ -24,7 +24,7 @@ function rpcRoute(req: express.Request, res: express.Response): void {
 
     getRawBody(
         req,
-        { length: req.headers["content-length"], limit: Connections.MAX_BYTES },
+        { length: req.headers["content-length"], limit: 2 * 1024 * 1024 },
         (err, body) => {
             if (err) {
                 console.debug("Reading HTTP body failed", err);

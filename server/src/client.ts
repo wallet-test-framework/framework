@@ -1,58 +1,63 @@
+import { LRUCache } from "lru-cache";
 import http from "node:http";
 import { RawData, WebSocket } from "ws";
 
 export class ClientState {
-    // TODO: Replace this Map with an LRUCache
-    readonly inFlight: Map<number, http.ServerResponse>;
+    private readonly inFlight: LRUCache<number, http.ServerResponse | false>;
+    private requestCount = 0;
 
-    requestCount = 0;
-
-    public maxInFlight = 25;
     public readonly connection: WebSocket;
 
     constructor(connection_: WebSocket) {
-        this.inFlight = new Map();
+        this.inFlight = new LRUCache({
+            max: 16,
+            dispose: (value, key) => this.disposeInFlight(value, key),
+        });
         this.connection = connection_;
         this.connection.on("message", (data) => this.onMessage(data));
     }
 
     private onMessage(data: RawData): void {
-        let number: unknown;
+        let key: unknown;
         let result: unknown;
 
         try {
             const parsed = JSON.parse(data.toString());
-            number = parsed.number;
+            key = parsed.number;
             result = parsed.result;
         } catch (err) {
             console.debug("Invalid WebSocket message", err);
         }
 
-        if (typeof number !== "number" || typeof result !== "object") {
+        if (typeof key !== "number" || typeof result !== "object") {
             this.connection.close(400);
             // TODO: Close connections in inFlight.
             return;
         }
 
-        const res = this.inFlight.get(number);
+        const res = this.inFlight.get(key);
         if (!res) {
             console.debug("Unexpected response");
             return;
         }
 
-        this.inFlight.delete(number);
+        // See: https://github.com/isaacs/node-lru-cache/issues/291
+        this.inFlight.set(key, false, { noDisposeOnSet: true });
+        this.inFlight.delete(key);
 
+        console.debug("Proxying response", key);
         res.writeHead(200).end(JSON.stringify(result));
     }
 
-    private evict(): [number, http.ServerResponse] {
-        // Get oldest entry in `inFlight`.
-        const [[key, value]] = this.inFlight;
+    private disposeInFlight(
+        value: http.ServerResponse | false,
+        key: number
+    ): void {
+        if (!value) {
+            return;
+        }
 
         console.debug("Evicting request", key);
-
-        // Remove it from the map.
-        this.inFlight.delete(key);
 
         // Send back an error.
         value
@@ -69,23 +74,11 @@ export class ClientState {
                     id: null,
                 })
             );
-
-        return [key, value];
     }
 
     public request(request: Buffer, res: http.ServerResponse): void {
         const requestId = this.requestCount++;
         this.inFlight.set(requestId, res);
-
-        // Make sure we don't have too many requests in flight.
-        if (this.inFlight.size > this.maxInFlight) {
-            const [evicted] = this.evict();
-            if (evicted === requestId) {
-                // We evicted the request we just added, so there's no point in
-                // continuing.
-                return;
-            }
-        }
 
         let body;
 
@@ -108,9 +101,7 @@ export class ClientState {
     }
 
     public dispose(): void {
-        while (this.inFlight.size > 0) {
-            this.evict();
-        }
         this.connection.close(504);
+        this.inFlight.clear();
     }
 }
