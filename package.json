@@ -24,7 +24,8 @@
         "build:client": "node ./client/Build.js && tsc -d --emitDeclarationOnly -p client",
         "build:server": "node ./server/Build.js && tsc -d --emitDeclarationOnly -p server",
         "build": "npm run build:client && npm run build:server",
-        "test": "prettier --check . && eslint . && npm run build"
+        "test": "prettier --check . && eslint . && npm run build",
+        "start": "node ./dist/server/index.js"
     },
     "repository": {
         "type": "git",
