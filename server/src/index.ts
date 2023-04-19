@@ -2,6 +2,7 @@
 import { Connections } from "./connections.js";
 import cors from "cors";
 import express from "express";
+import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { URL } from "node:url";
 import getRawBody from "raw-body";
@@ -41,8 +42,8 @@ app.post("/rpc/:key", rpcRoute);
 app.get("/rpc/:key", rpcRoute);
 
 // Create server
-const PORT = 3000;
-const server = app.listen(3000, () => {
+const PORT = "PORT" in process.env ? parseInt(process.env.PORT || "") : 3000;
+const server = app.listen(PORT, () => {
     console.info(`Listening on ${PORT}...`);
 });
 
