@@ -1,6 +1,5 @@
 import { typecheckPlugin } from "@jgoz/esbuild-plugin-typecheck";
 import * as esbuild from "esbuild";
-import { copyFile } from "node:fs/promises";
 import process from "node:process";
 import { URL, fileURLToPath, pathToFileURL } from "node:url";
 
@@ -9,9 +8,11 @@ const options = {
 
     absWorkingDir: fileURLToPath(new URL(".", import.meta.url)),
 
-    entryPoints: ["src/index.ts", "src/worker_chain.ts"],
+    entryPoints: ["src/index.ts", "src/worker_chain.ts", "src/index.html"],
 
     inject: ["src/shim-process.js"],
+
+    loader: { ".html": "copy" },
 
     bundle: true,
     outbase: "src",
@@ -25,11 +26,6 @@ const options = {
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     await esbuild.build(options);
-
-    await copyFile(
-        new URL("./src/index.html", import.meta.url),
-        new URL("../dist/client/index.html", import.meta.url)
-    );
 }
 
 export { options as default };
