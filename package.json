@@ -46,6 +46,9 @@
         "url": "https://github.com/wallet-test-framework/framework/issues"
     },
     "homepage": "https://wtf.allwallet.dev/",
+    "engines": {
+        "node": "~18.14.2"
+    },
     "devDependencies": {
         "@jgoz/esbuild-plugin-typecheck": "^3.0.2",
         "@trivago/prettier-plugin-sort-imports": "^4.1.1",
