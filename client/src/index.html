@@ -20,6 +20,12 @@
                 overflow-x: hidden;
                 overflow-y: scroll;
             }
+            span[slot] {
+                user-select: all;
+            }
+            #glue {
+                display: none;
+            }
         </style>
     </head>
 
@@ -45,6 +51,109 @@
                 risks.
             </p>
             <a id="connect" href="#">Connect</a>
+        </div>
+        <div id="glue">
+            <section class="events-container">
+                <h2>Events</h2>
+                <p>
+                    Your wallet will display prompts as the tests run. Select
+                    the appropriate category below, and fill in the form. Do not
+                    approve or reject the wallet's prompt until instructed to do
+                    so.
+                </p>
+                <div class="events">
+                    <ul>
+                        <li>
+                            <button>Request Accounts</button>
+                            <dialog data-event="request-accounts">
+                                <form method="dialog">
+                                    <label>
+                                        Domain:
+                                        <input
+                                            required
+                                            name="domain"
+                                            placeholder="example.com"
+                                            pattern="[-a-zA-Z0-9\.]+"
+                                            spellcheck="false"
+                                        />
+                                    </label>
+                                    <label>
+                                        Accounts <small>(one per line)</small>:
+                                        <textarea
+                                            required
+                                            name="accounts"
+                                            placeholder="0x..."
+                                            spellcheck="false"
+                                            cols="42"
+                                            minlength="42"
+                                        ></textarea>
+                                    </label>
+                                    <div>
+                                        <button
+                                            formnovalidate
+                                            type="submit"
+                                            name="cancel"
+                                            value="cancel"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button type="submit">Submit</button>
+                                    </div>
+                                </form>
+                            </dialog>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+            <section class="instructions-container">
+                <h2>Instructions</h2>
+
+                <div class="instructions"></div>
+
+                <template id="wtf-activate-chain">
+                    <h3>Activate Chain</h3>
+                    <p>
+                        Switch to a chain (sometimes called a network) in your
+                        wallet with the following information:
+                    </p>
+                    <table>
+                        <tbody>
+                            <tr>
+                                <th scope="row">Chain ID:</th>
+                                <td>
+                                    <code><slot name="chain-id"></slot></code>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">RPC URL:</th>
+                                <td>
+                                    <code><slot name="rpc-url"></slot></code>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </template>
+
+                <template id="wtf-request-accounts">
+                    <h3>Request Accounts</h3>
+                    <p>
+                        Your wallet should be showing a permission request from
+                        <strong><slot name="id"></slot></strong>. Allow access
+                        to the following account(s):
+                    </p>
+                    <slot name="accounts"></slot>
+                </template>
+
+                <template id="wtf-instruct">
+                    <section>
+                        <slot name="content"></slot>
+                        <div>
+                            <slot name="abort"></slot>
+                            <slot name="complete"></slot>
+                        </div>
+                    </section>
+                </template>
+            </section>
         </div>
         <div id="mocha"></div>
         <script type="module" src="/index.js"></script>
