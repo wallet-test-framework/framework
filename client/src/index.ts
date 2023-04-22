@@ -1,8 +1,8 @@
+import { ManualGlue } from "./glue";
 import * as tests from "./tests";
+import { Glue } from "@wallet-test-framework/glue";
 import { ethers } from "ethers";
 import "mocha/mocha.css";
-
-const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
 declare global {
     interface Window {
@@ -59,6 +59,21 @@ async function main() {
 
         const wallet = new ethers.BrowserProvider(window.ethereum, "any");
 
+        let glue: Glue;
+        const config = new URLSearchParams(window.location.hash);
+        const wsGlueAddress = config.get("glue");
+
+        if (wsGlueAddress) {
+            throw new Error("not implemented");
+        } else {
+            const glueElem = document.getElementById("glue");
+            if (!glueElem) {
+                throw "no #glue element";
+            }
+
+            glue = new ManualGlue(glueElem, wallet);
+        }
+
         const uuid = crypto.randomUUID();
 
         const wsUrl = new URL(`./${uuid}`, window.location.href);
@@ -91,43 +106,22 @@ async function main() {
         const open = async () => {
             webSocket?.removeEventListener("open", open);
 
-            await wallet.send("wallet_addEthereumChain", [
-                {
-                    chainId: "0x" + network.chainId.toString(16),
-                    chainName: `Test Chain ${network.chainId}`,
-                    nativeCurrency: {
-                        name: "teth",
-                        symbol: "teth",
-                        decimals: 18,
-                    },
-                    rpcUrls: [rpcUrl.href],
-                },
-            ]);
+            await glue.activateChain({
+                chainId: "0x" + network.chainId.toString(16),
+                rpcUrl: rpcUrl.href,
+            });
 
-            let switched = false;
-            do {
-                try {
-                    await wallet.send("wallet_switchEthereumChain", [
-                        {
-                            chainId: "0x" + network.chainId.toString(16),
-                        },
-                    ]);
-                    switched = true;
-                } catch (e: unknown) {
-                    if (e instanceof Error && "error" in e) {
-                        if (e.error instanceof Object && "code" in e.error) {
-                            if (e.error.code === 4902) {
-                                await delay(1000);
-                                continue;
-                            }
-                        }
-                    }
-
-                    throw e;
-                }
-            } while (!switched);
+            const unsubscribe = glue.on("requestaccounts", (event) => {
+                unsubscribe();
+                glue.requestAccounts({
+                    action: "approve",
+                    id: event.id,
+                    accounts: [event.accounts[0]],
+                });
+            });
 
             await wallet.send("eth_requestAccounts", []);
+            unsubscribe();
 
             await tests.run(blockchain, wallet);
         };
