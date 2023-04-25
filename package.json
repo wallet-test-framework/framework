@@ -71,6 +71,7 @@
         "mocha": "^10.2.0",
         "prettier": "2.8.7",
         "process": "^0.11.10",
+        "solc": "0.8.19",
         "typescript": "^5.0.4"
     },
     "dependencies": {
