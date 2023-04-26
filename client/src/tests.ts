@@ -25,6 +25,7 @@ export async function run(
     await import("./tests/eth/blockNumber");
     await import("./tests/eth/getBalance");
     await import("./tests/eth/getTransactionByHash");
+    await import("./tests/eth/newFilter");
 
     mocha.run();
 }
