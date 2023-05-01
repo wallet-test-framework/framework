@@ -7,7 +7,10 @@ describe("getBlockTransactionCountByNumber", () => {
             throw "not ready";
         }
 
-        const blockNumber = await blockchain.getBlockNumber();
+        const blockNumber = Number.parseInt(
+            await blockchain.send("eth_blockNumber", []),
+            16
+        );
 
         await blockchain.send("evm_mine", [{ blocks: 1 }]);
 
@@ -36,7 +39,10 @@ describe("getBlockTransactionCountByNumber", () => {
             value: value,
         });
 
-        const blockNumber = await blockchain.getBlockNumber();
+        const blockNumber = Number.parseInt(
+            await blockchain.send("eth_blockNumber", []),
+            16
+        );
 
         await blockchain.send("evm_mine", [{ blocks: 1 }]);
         await response.wait(1);

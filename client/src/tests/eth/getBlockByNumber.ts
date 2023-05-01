@@ -16,7 +16,10 @@ describe("getBlockByNumber", () => {
             value: value,
         });
 
-        const blockNumber = await blockchain.getBlockNumber();
+        const blockNumber = Number.parseInt(
+            await blockchain.send("eth_blockNumber", []),
+            16
+        );
 
         await blockchain.send("evm_mine", [{ blocks: 1 }]);
         await response.wait(1);
