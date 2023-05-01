@@ -1,14 +1,24 @@
-import { blockchain, wallet } from "../../tests";
+import * as tests from "../../tests";
+import { retry } from "../../util";
 import assert from "assert";
+
+const blockchain = tests.blockchain;
+const wallet = tests.wallet;
+
+if (!blockchain || !wallet) {
+    throw "not ready";
+}
 
 describe("blockNumber", () => {
     it("block number from wallet and ganache are the same", async () => {
-        if (!blockchain || !wallet) {
-            throw "not ready";
-        }
-
-        const walletInitalBlockNumber = await wallet.getBlockNumber();
-        const ganacheInitalBlockNumber = await blockchain.getBlockNumber();
+        const walletInitalBlockNumber = Number.parseInt(
+            await wallet.send("eth_blockNumber", []),
+            16
+        );
+        const ganacheInitalBlockNumber = Number.parseInt(
+            await blockchain.send("eth_blockNumber", []),
+            16
+        );
 
         assert.equal(
             walletInitalBlockNumber.toString(),
@@ -18,17 +28,26 @@ describe("blockNumber", () => {
 
         await blockchain.send("evm_mine", [{ blocks: 5000 }]);
 
-        const walletFinalBlockNumber = await wallet.getBlockNumber();
-        const ganacheFinalBlockNumber = await blockchain.getBlockNumber();
-
-        assert.equal(
-            walletFinalBlockNumber.toString(),
-            ganacheFinalBlockNumber.toString(),
-            "finalBlockNumber"
+        const ganacheFinalBlockNumber = Number.parseInt(
+            await blockchain.send("eth_blockNumber", []),
+            16
         );
 
         const expected = walletInitalBlockNumber + 5000;
+        assert.equal(ganacheFinalBlockNumber, expected);
 
-        assert.equal(walletFinalBlockNumber, expected);
+        await retry(async () => {
+            const walletFinalBlockNumber = Number.parseInt(
+                await wallet.send("eth_blockNumber", []),
+                16
+            );
+
+            assert.equal(
+                walletFinalBlockNumber.toString(),
+                ganacheFinalBlockNumber.toString(),
+                `wallet's final block number (${walletFinalBlockNumber}) equals` +
+                    ` blockchain's final block number (${ganacheFinalBlockNumber})`
+            );
+        });
     });
 });
