@@ -1,39 +1,60 @@
 <!DOCTYPE html>
 <html lang="">
     <head>
-        <meta charset="utf-8" />
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
         <title>Wallet Test</title>
         <link rel="stylesheet" href="/index.css" />
         <style>
-            body {
-                display: flex;
-                flex-direction: column;
-                gap: 3em;
-            }
             body,
             html {
                 height: 100%;
                 overflow: hidden;
             }
-            #mocha {
-                flex: 1;
-                overflow-x: hidden;
-                overflow-y: scroll;
-            }
             span[slot] {
                 user-select: all;
             }
-            #glue {
+            .events-container,
+            .instructions-container {
+                display: none;
+            }
+            .glue-active .events-container,
+            .glue-active .instructions-container {
+                display: initial;
+            }
+            #container {
+                display: flex;
+                gap: 3em;
+                height: 100%;
+            }
+            #container > * {
+                flex: 1;
+                overflow-x: hidden;
+                overflow-y: auto;
+            }
+            .mocha-container {
+                order: -1;
+            }
+            #welcome[open] + * {
                 display: none;
             }
             dialog label {
                 display: block;
             }
+            @media (max-width: 1600px) {
+                body,
+                html {
+                    height: initial;
+                    overflow: initial;
+                }
+                #container {
+                    height: initial;
+                    display: initial;
+                }
+            }
         </style>
     </head>
-
     <body>
-        <div id="welcome">
+        <dialog id="welcome" open>
             <h1>Wallet Test Framework</h1>
             <p>
                 This page will run your Ethereum wallet through a set of tests
@@ -53,9 +74,11 @@
                 the tests use a simulated blockchain, it's safer to not take any
                 risks.
             </p>
-            <a id="connect" href="#">Connect</a>
-        </div>
-        <div id="glue">
+            <form method="dialog">
+                <button href="#" id="connect" type="submit">Connect</button>
+            </form>
+        </dialog>
+        <div id="container">
             <section class="events-container">
                 <h2>Events</h2>
                 <p>
@@ -181,7 +204,7 @@
                                     <label>
                                         Domain:
                                         <input
-                                            required
+                                            required=""
                                             name="domain"
                                             placeholder="example.com"
                                             pattern="[-a-zA-Z0-9\.]+"
@@ -191,7 +214,7 @@
                                     <label>
                                         Accounts <small>(one per line)</small>:
                                         <textarea
-                                            required
+                                            required=""
                                             name="accounts"
                                             placeholder="0x..."
                                             spellcheck="false"
@@ -201,7 +224,7 @@
                                     </label>
                                     <div>
                                         <button
-                                            formnovalidate
+                                            formnovalidate=""
                                             type="submit"
                                             name="cancel"
                                             value="cancel"
@@ -218,9 +241,7 @@
             </section>
             <section class="instructions-container">
                 <h2>Instructions</h2>
-
                 <div class="instructions"></div>
-
                 <template id="wtf-switch-ethereum-chain">
                     <h3>Switch Ethereum Chain</h3>
                     <p>
@@ -240,7 +261,6 @@
                         request.
                     </p>
                 </template>
-
                 <template id="wtf-activate-chain">
                     <h3>Activate Chain</h3>
                     <p>
@@ -264,7 +284,6 @@
                         </tbody>
                     </table>
                 </template>
-
                 <template id="wtf-request-accounts">
                     <h3>Request Accounts</h3>
                     <p>
@@ -274,7 +293,6 @@
                     </p>
                     <slot name="accounts"></slot>
                 </template>
-
                 <template id="wtf-instruct">
                     <section>
                         <slot name="content"></slot>
@@ -285,8 +303,11 @@
                     </section>
                 </template>
             </section>
+            <section class="mocha-container">
+                <h2>Results</h2>
+                <div id="mocha"></div>
+            </section>
         </div>
-        <div id="mocha"></div>
         <script type="module" src="/index.js"></script>
     </body>
 </html>
