@@ -305,91 +305,100 @@ export class ManualGlue extends Glue {
         // MetaMask (and possibly others) display a switch chain prompt before
         // returning from `wallet_addEthereumChain`. To catch that prompt, we
         // have to listen to the switch event before even adding the chain.
-        const switchEvent = this.next("switchethereumchain").then(
-            async (ev) => {
-                assert.strictEqual(
-                    Number.parseInt(ev.chainId),
-                    Number.parseInt(action.chainId),
-                    `expected to switch to chain ${action.chainId},` +
-                        ` but got ${ev.chainId}`
-                );
+        let switchActionPromise: Promise<unknown> | null = null;
+        const switchUnsubscribe = this.on("switchethereumchain", async (ev) => {
+            switchUnsubscribe();
+            assert.strictEqual(
+                Number.parseInt(ev.chainId),
+                Number.parseInt(action.chainId),
+                `expected to switch to chain ${action.chainId},` +
+                    ` but got ${ev.chainId}`
+            );
 
-                await this.switchEthereumChain({
-                    id: ev.id,
-                    action: "approve",
-                });
-            }
-        );
-
-        const addPromise = this.wallet.send("wallet_addEthereumChain", [
-            {
-                chainId: action.chainId,
-                chainName: `Test Chain ${action.chainId}`,
-                nativeCurrency: {
-                    name: "teth",
-                    symbol: "teth",
-                    decimals: 18,
-                },
-                rpcUrls: [action.rpcUrl],
-            },
-        ]);
-
-        const addEvent = await this.next("addethereumchain");
-
-        assert.strictEqual(
-            addEvent.rpcUrls.length,
-            1,
-            `expected one RPC URL, but got ${addEvent.rpcUrls.length}`
-        );
-
-        assert.strictEqual(
-            addEvent.rpcUrls[0],
-            action.rpcUrl,
-            `expected an RPC URL of "${action.rpcUrl}",` +
-                ` but got "${addEvent.rpcUrls[0]}"`
-        );
-
-        assert.strictEqual(
-            Number.parseInt(addEvent.chainId),
-            Number.parseInt(action.chainId),
-            `expected a chain id of ${action.chainId},` +
-                ` but got ${addEvent.chainId}`
-        );
-
-        await this.addEthereumChain({
-            id: addEvent.id,
-            action: "approve",
+            switchActionPromise = this.switchEthereumChain({
+                id: ev.id,
+                action: "approve",
+            });
         });
 
-        await addPromise;
+        try {
+            const addPromise = this.wallet.send("wallet_addEthereumChain", [
+                {
+                    chainId: action.chainId,
+                    chainName: `Test Chain ${action.chainId}`,
+                    nativeCurrency: {
+                        name: "teth",
+                        symbol: "teth",
+                        decimals: 18,
+                    },
+                    rpcUrls: [action.rpcUrl],
+                },
+            ]);
 
-        const switchPromise = (async () => {
-            let switched = false;
-            do {
-                try {
-                    await this.wallet.send("wallet_switchEthereumChain", [
-                        {
-                            chainId: action.chainId,
-                        },
-                    ]);
-                    switched = true;
-                } catch (e: unknown) {
-                    if (e instanceof Error && "error" in e) {
-                        if (e.error instanceof Object && "code" in e.error) {
-                            if (e.error.code === 4902) {
-                                await delay(1000);
-                                continue;
+            const addEvent = await this.next("addethereumchain");
+
+            assert.strictEqual(
+                addEvent.rpcUrls.length,
+                1,
+                `expected one RPC URL, but got ${addEvent.rpcUrls.length}`
+            );
+
+            assert.strictEqual(
+                addEvent.rpcUrls[0],
+                action.rpcUrl,
+                `expected an RPC URL of "${action.rpcUrl}",` +
+                    ` but got "${addEvent.rpcUrls[0]}"`
+            );
+
+            assert.strictEqual(
+                Number.parseInt(addEvent.chainId),
+                Number.parseInt(action.chainId),
+                `expected a chain id of ${action.chainId},` +
+                    ` but got ${addEvent.chainId}`
+            );
+
+            await this.addEthereumChain({
+                id: addEvent.id,
+                action: "approve",
+            });
+
+            await addPromise;
+
+            const switchPromise = (async () => {
+                let switched = false;
+                do {
+                    try {
+                        await this.wallet.send("wallet_switchEthereumChain", [
+                            {
+                                chainId: action.chainId,
+                            },
+                        ]);
+                        switched = true;
+                    } catch (e: unknown) {
+                        if (e instanceof Error && "error" in e) {
+                            if (
+                                e.error instanceof Object &&
+                                "code" in e.error
+                            ) {
+                                if (e.error.code === 4902) {
+                                    await delay(1000);
+                                    continue;
+                                }
                             }
                         }
+
+                        throw e;
                     }
+                } while (!switched);
+            })();
 
-                    throw e;
-                }
-            } while (!switched);
-        })();
-
-        await switchEvent;
-        await switchPromise;
+            await switchPromise;
+            if (switchActionPromise) {
+                await switchActionPromise;
+            }
+        } finally {
+            switchUnsubscribe();
+        }
     }
 
     override async activateChain(action: ActivateChain): Promise<void> {
