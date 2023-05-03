@@ -26,6 +26,9 @@
             #glue {
                 display: none;
             }
+            dialog label {
+                display: block;
+            }
         </style>
     </head>
 
@@ -63,6 +66,114 @@
                 </p>
                 <div class="events">
                     <ul>
+                        <li>
+                            <button>Add Ethereum Chain</button>
+                            <dialog data-event="add-ethereum-chain">
+                                <form method="dialog">
+                                    <label>
+                                        Domain:
+                                        <input
+                                            required
+                                            name="domain"
+                                            placeholder="example.com"
+                                            pattern="[-a-zA-Z0-9\.]+"
+                                            spellcheck="false"
+                                        />
+                                    </label>
+                                    <label>
+                                        Chain ID:
+                                        <input
+                                            required
+                                            name="chain-id"
+                                            pattern="[0-9]+|(0x[a-fA-f0-9]+)"
+                                            spellcheck="false"
+                                        />
+                                    </label>
+                                    <label>
+                                        Chain Name:
+                                        <input
+                                            name="chain-name"
+                                            spellcheck="false"
+                                        />
+                                    </label>
+                                    <label>
+                                        Block Explorer URLs
+                                        <small>(one per line)</small>:
+                                        <textarea
+                                            name="block-explorer-urls"
+                                            placeholder="https://..."
+                                            spellcheck="false"
+                                        ></textarea>
+                                    </label>
+                                    <label>
+                                        Icon URLs <small>(one per line)</small>:
+                                        <textarea
+                                            name="icon-urls"
+                                            placeholder="https://..."
+                                            spellcheck="false"
+                                        ></textarea>
+                                    </label>
+                                    <label>
+                                        RPC URLs <small>(one per line)</small>:
+                                        <textarea
+                                            required
+                                            name="rpc-urls"
+                                            placeholder="https://..."
+                                            spellcheck="false"
+                                            minlength="4"
+                                        ></textarea>
+                                    </label>
+                                    <div>
+                                        <button
+                                            formnovalidate
+                                            type="submit"
+                                            name="cancel"
+                                            value="cancel"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button type="submit">Submit</button>
+                                    </div>
+                                </form>
+                            </dialog>
+                        </li>
+                        <li>
+                            <button>Switch Ethereum Chain</button>
+                            <dialog data-event="switch-ethereum-chain">
+                                <form method="dialog">
+                                    <label>
+                                        Domain:
+                                        <input
+                                            required
+                                            name="domain"
+                                            placeholder="example.com"
+                                            pattern="[-a-zA-Z0-9\.]+"
+                                            spellcheck="false"
+                                        />
+                                    </label>
+                                    <label>
+                                        Chain ID:
+                                        <input
+                                            required
+                                            name="chain-id"
+                                            pattern="[0-9]+|(0x[a-fA-f0-9]+)"
+                                            spellcheck="false"
+                                        />
+                                    </label>
+                                    <div>
+                                        <button
+                                            formnovalidate
+                                            type="submit"
+                                            name="cancel"
+                                            value="cancel"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button type="submit">Submit</button>
+                                    </div>
+                                </form>
+                            </dialog>
+                        </li>
                         <li>
                             <button>Request Accounts</button>
                             <dialog data-event="request-accounts">
@@ -109,6 +220,26 @@
                 <h2>Instructions</h2>
 
                 <div class="instructions"></div>
+
+                <template id="wtf-switch-ethereum-chain">
+                    <h3>Switch Ethereum Chain</h3>
+                    <p>
+                        Your wallet should be showing a switch chain (sometimes
+                        called a network) request from
+                        <strong><slot name="id"></slot></strong>. Approve this
+                        request.
+                    </p>
+                </template>
+
+                <template id="wtf-add-ethereum-chain">
+                    <h3>Add Ethereum Chain</h3>
+                    <p>
+                        Your wallet should be showing an add chain (sometimes
+                        called a network) request from
+                        <strong><slot name="id"></slot></strong>. Approve this
+                        request.
+                    </p>
+                </template>
 
                 <template id="wtf-activate-chain">
                     <h3>Activate Chain</h3>

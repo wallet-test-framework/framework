@@ -1,10 +1,15 @@
 import { delay } from "./util";
 import {
     ActivateChain,
+    AddEthereumChain,
+    AddEthereumChainEvent,
     Glue,
     RequestAccounts,
     RequestAccountsEvent,
+    SwitchEthereumChain,
+    SwitchEthereumChainEvent,
 } from "@wallet-test-framework/glue";
+import assert from "assert";
 import { ethers } from "ethers";
 
 type TemplateContext = { [key: string]: string | HTMLElement };
@@ -58,6 +63,10 @@ abstract class Template extends HTMLElement {
 const ActivateChainTemplate = Template.define("wtf-activate-chain");
 const InstructTemplate = Template.define("wtf-instruct");
 const RequestAccountsTemplate = Template.define("wtf-request-accounts");
+const AddEthereumChainTemplate = Template.define("wtf-add-ethereum-chain");
+const SwitchEthereumChainTemplate = Template.define(
+    "wtf-switch-ethereum-chain"
+);
 
 export class ManualGlue extends Glue {
     private readonly rootElement: HTMLElement;
@@ -91,21 +100,83 @@ export class ManualGlue extends Glue {
         this.attachEvents();
     }
 
-    private emitRequestAccounts(data: Map<string, FormDataEntryValue>) {
+    private static splitArray(input?: string): undefined | string[] {
+        if (!input) {
+            return;
+        }
+
+        input = input.trim();
+
+        if (!input.length) {
+            return;
+        }
+
+        return input.split(/[\s]+/);
+    }
+
+    private emitSwitchEthereumChain(data: Map<string, string>) {
+        const domain = data.get("domain");
+        const chainId = data.get("chain-id");
+
+        if (!domain || !chainId) {
+            throw "incomplete switch-ethereum-chain";
+        }
+
+        this.emit(
+            "switchethereumchain",
+            new SwitchEthereumChainEvent(domain, {
+                chainId,
+            })
+        );
+    }
+
+    private emitAddEthereumChain(data: Map<string, string>) {
+        const domain = data.get("domain");
+        const chainId = data.get("chain-id");
+        let chainName = data.get("chain-name");
+        const blockExplorerUrls = ManualGlue.splitArray(
+            data.get("block-explorer-urls")
+        );
+        const iconUrls = ManualGlue.splitArray(data.get("icon-urls"));
+        const rpcUrls = ManualGlue.splitArray(data.get("rpc-urls"));
+
+        // TODO: nativeCurrency
+
+        if (!domain || !chainId) {
+            throw "incomplete add-ethereum-chain";
+        }
+
+        if (chainName?.trim() === "") {
+            chainName = undefined;
+        }
+
+        this.emit(
+            "addethereumchain",
+            new AddEthereumChainEvent(domain, {
+                chainId,
+                chainName,
+                blockExplorerUrls,
+                iconUrls,
+                rpcUrls,
+            })
+        );
+    }
+
+    private emitRequestAccounts(data: Map<string, string>) {
         const accountsText = data.get("accounts");
         if (typeof accountsText !== "string") {
-            throw "accounts wasn't a string";
+            throw "form missing accounts";
         }
 
         const domain = data.get("domain");
         if (typeof domain !== "string") {
-            throw "domain wasn't a string";
+            throw "form missing domain";
         }
 
         const accounts = accountsText.split(/[^a-fA-Fx0-9]/);
         this.emit(
             "requestaccounts",
-            new RequestAccountsEvent(domain, accounts)
+            new RequestAccountsEvent(domain, { accounts })
         );
     }
 
@@ -113,11 +184,13 @@ export class ManualGlue extends Glue {
         const dialogs = this.eventsElement.querySelectorAll("dialog");
 
         type Handlers = {
-            [key: string]: (_: Map<string, FormDataEntryValue>) => void;
+            [key: string]: (_: Map<string, string>) => void;
         };
 
         const handlers: Handlers = {
             "request-accounts": (d) => this.emitRequestAccounts(d),
+            "add-ethereum-chain": (d) => this.emitAddEthereumChain(d),
+            "switch-ethereum-chain": (d) => this.emitSwitchEthereumChain(d),
         };
 
         for (const dialog of dialogs) {
@@ -164,7 +237,15 @@ export class ManualGlue extends Glue {
                     }
                 }
 
-                const data = new Map(new FormData(form));
+                const rawData = new FormData(form);
+                const data = new Map();
+                for (const [key, value] of rawData) {
+                    if (typeof value === "string") {
+                        data.set(key, value);
+                    } else {
+                        throw `form field ${key} has non-string value ${value}`;
+                    }
+                }
                 handler(data);
             });
         }
@@ -172,6 +253,32 @@ export class ManualGlue extends Glue {
         for (const unused of Object.keys(handlers)) {
             console.warn("unused handler", unused);
         }
+    }
+
+    override async switchEthereumChain(
+        action: SwitchEthereumChain
+    ): Promise<void> {
+        if (action.action !== "approve") {
+            throw "not implemented";
+        }
+
+        await this.instruct(
+            new SwitchEthereumChainTemplate({
+                id: action.id,
+            })
+        );
+    }
+
+    override async addEthereumChain(action: AddEthereumChain): Promise<void> {
+        if (action.action !== "approve") {
+            throw "not implemented";
+        }
+
+        await this.instruct(
+            new AddEthereumChainTemplate({
+                id: action.id,
+            })
+        );
     }
 
     override async requestAccounts(action: RequestAccounts): Promise<void> {
@@ -194,9 +301,27 @@ export class ManualGlue extends Glue {
         );
     }
 
-    private async addEthereumChain(action: ActivateChain): Promise<void> {
-        // TODO: Display instructions to approve these two actions in the wallet.
-        await this.wallet.send("wallet_addEthereumChain", [
+    private async tryAddEthereumChain(action: ActivateChain): Promise<void> {
+        // MetaMask (and possibly others) display a switch chain prompt before
+        // returning from `wallet_addEthereumChain`. To catch that prompt, we
+        // have to listen to the switch event before even adding the chain.
+        const switchEvent = this.next("switchethereumchain").then(
+            async (ev) => {
+                assert.strictEqual(
+                    Number.parseInt(ev.chainId),
+                    Number.parseInt(action.chainId),
+                    `expected to switch to chain ${action.chainId},` +
+                        ` but got ${ev.chainId}`
+                );
+
+                await this.switchEthereumChain({
+                    id: ev.id,
+                    action: "approve",
+                });
+            }
+        );
+
+        const addPromise = this.wallet.send("wallet_addEthereumChain", [
             {
                 chainId: action.chainId,
                 chainName: `Test Chain ${action.chainId}`,
@@ -209,33 +334,67 @@ export class ManualGlue extends Glue {
             },
         ]);
 
-        let switched = false;
-        do {
-            try {
-                await this.wallet.send("wallet_switchEthereumChain", [
-                    {
-                        chainId: action.chainId,
-                    },
-                ]);
-                switched = true;
-            } catch (e: unknown) {
-                if (e instanceof Error && "error" in e) {
-                    if (e.error instanceof Object && "code" in e.error) {
-                        if (e.error.code === 4902) {
-                            await delay(1000);
-                            continue;
+        const addEvent = await this.next("addethereumchain");
+
+        assert.strictEqual(
+            addEvent.rpcUrls.length,
+            1,
+            `expected one RPC URL, but got ${addEvent.rpcUrls.length}`
+        );
+
+        assert.strictEqual(
+            addEvent.rpcUrls[0],
+            action.rpcUrl,
+            `expected an RPC URL of "${action.rpcUrl}",` +
+                ` but got "${addEvent.rpcUrls[0]}"`
+        );
+
+        assert.strictEqual(
+            Number.parseInt(addEvent.chainId),
+            Number.parseInt(action.chainId),
+            `expected a chain id of ${action.chainId},` +
+                ` but got ${addEvent.chainId}`
+        );
+
+        await this.addEthereumChain({
+            id: addEvent.id,
+            action: "approve",
+        });
+
+        await addPromise;
+
+        const switchPromise = (async () => {
+            let switched = false;
+            do {
+                try {
+                    await this.wallet.send("wallet_switchEthereumChain", [
+                        {
+                            chainId: action.chainId,
+                        },
+                    ]);
+                    switched = true;
+                } catch (e: unknown) {
+                    if (e instanceof Error && "error" in e) {
+                        if (e.error instanceof Object && "code" in e.error) {
+                            if (e.error.code === 4902) {
+                                await delay(1000);
+                                continue;
+                            }
                         }
                     }
-                }
 
-                throw e;
-            }
-        } while (!switched);
+                    throw e;
+                }
+            } while (!switched);
+        })();
+
+        await switchEvent;
+        await switchPromise;
     }
 
     override async activateChain(action: ActivateChain): Promise<void> {
         try {
-            await this.addEthereumChain(action);
+            await this.tryAddEthereumChain(action);
             return;
         } catch (e: unknown) {
             // wallet_addEthereumChain isn't exactly the safest endpoint, so we
