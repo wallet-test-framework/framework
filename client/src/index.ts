@@ -66,9 +66,9 @@ async function main() {
         if (wsGlueAddress) {
             throw new Error("not implemented");
         } else {
-            const glueElem = document.getElementById("glue");
+            const glueElem = document.getElementById("container");
             if (!glueElem) {
-                throw "no #glue element";
+                throw "no #container element";
             }
 
             glue = new ManualGlue(glueElem, wallet);

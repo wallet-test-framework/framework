@@ -95,7 +95,7 @@ export class ManualGlue extends Glue {
         this.eventsElement = events;
         this.instructionsElement = instructions;
 
-        element.style.display = "initial";
+        element.classList.add("glue-active");
 
         this.attachEvents();
     }
