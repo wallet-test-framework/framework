@@ -27,20 +27,31 @@
                 height: 100%;
             }
             #container > * {
-                flex: 1;
+                flex: 2;
                 overflow-x: hidden;
                 overflow-y: auto;
             }
-            .mocha-container {
+            #container .mocha-container {
                 order: -1;
+                flex: 3;
             }
             #welcome[open] + * {
                 display: none;
             }
+            .autoscroll {
+                scroll-behavior: smooth;
+            }
+            .autoscroll * {
+                overflow-anchor: none;
+            }
+            .autoscroll .scroll-anchor {
+                overflow-anchor: auto;
+                height: 1px;
+            }
             dialog label {
                 display: block;
             }
-            @media (max-width: 1600px) {
+            @media (max-width: 1279px) {
                 body,
                 html {
                     height: initial;
@@ -303,9 +314,10 @@
                     </section>
                 </template>
             </section>
-            <section class="mocha-container">
+            <section class="mocha-container autoscroll">
                 <h2>Results</h2>
                 <div id="mocha"></div>
+                <div class="scroll-anchor"></div>
             </section>
         </div>
         <script type="module" src="/index.js"></script>
