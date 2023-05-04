@@ -1,6 +1,4 @@
 import { ethers } from "ethers";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import mocha from "mocha/mocha.js";
 
 export let wallet: ethers.BrowserProvider | null;

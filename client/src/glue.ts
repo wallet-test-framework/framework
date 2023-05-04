@@ -238,12 +238,12 @@ export class ManualGlue extends Glue {
                 }
 
                 const rawData = new FormData(form);
-                const data = new Map();
+                const data = new Map<string, string>();
                 for (const [key, value] of rawData) {
                     if (typeof value === "string") {
                         data.set(key, value);
                     } else {
-                        throw `form field ${key} has non-string value ${value}`;
+                        throw `form field ${key} has non-string type`;
                     }
                 }
                 handler(data);
@@ -305,8 +305,8 @@ export class ManualGlue extends Glue {
         // MetaMask (and possibly others) display a switch chain prompt before
         // returning from `wallet_addEthereumChain`. To catch that prompt, we
         // have to listen to the switch event before even adding the chain.
-        let switchActionPromise: Promise<unknown> | null = null;
-        const switchUnsubscribe = this.on("switchethereumchain", async (ev) => {
+        let switchActionPromise: unknown = null;
+        const switchUnsubscribe = this.on("switchethereumchain", (ev) => {
             switchUnsubscribe();
             assert.strictEqual(
                 Number.parseInt(ev.chainId),
@@ -393,7 +393,7 @@ export class ManualGlue extends Glue {
             })();
 
             await switchPromise;
-            if (switchActionPromise) {
+            if (switchActionPromise instanceof Promise) {
                 await switchActionPromise;
             }
         } finally {

@@ -60,8 +60,9 @@ describe("getBlockTransactionCountByHash", () => {
         assert.equal(
             mined0?.blockHash,
             blockHash0,
-            `transaction block ${mined0?.blockNumber} (${mined0?.blockHash})` +
-                ` matches mined block ${blockNumber + 1} (${blockHash0})`
+            `transaction block ${mined0?.blockNumber ?? "<none>"} (${
+                mined0?.blockHash ?? "<none>"
+            }) matches mined block ${blockNumber + 1} (${blockHash0})`
         );
 
         // Create a block with two transactions
@@ -86,8 +87,9 @@ describe("getBlockTransactionCountByHash", () => {
         assert.equal(
             mined1?.blockHash,
             blockHash1,
-            `transaction block ${mined1?.blockNumber} (${mined1?.blockHash})` +
-                ` matches mined block ${blockNumber + 2} (${blockHash1})`
+            `transaction block ${mined1?.blockNumber ?? "<none>"} (${
+                mined1?.blockHash ?? "<none>"
+            })` + ` matches mined block ${blockNumber + 2} (${blockHash1})`
         );
 
         const count0 = await wallet.send("eth_getBlockTransactionCountByHash", [

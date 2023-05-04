@@ -20,13 +20,17 @@ export class ClientState {
     private onMessage(data: RawData): void {
         let key: unknown;
         let result: unknown;
+        let parsed: unknown;
 
         try {
-            const parsed = JSON.parse(data.toString());
-            key = parsed.number;
-            result = parsed.result;
+            parsed = JSON.parse(data.toString());
         } catch (err) {
             console.debug("Invalid WebSocket message", err);
+        }
+
+        if (typeof parsed === "object" && parsed) {
+            key = "number" in parsed ? parsed.number : undefined;
+            result = "result" in parsed ? parsed.result : undefined;
         }
 
         if (typeof key !== "number" || typeof result !== "object") {
@@ -80,7 +84,7 @@ export class ClientState {
         const requestId = this.requestCount++;
         this.inFlight.set(requestId, res);
 
-        let body;
+        let body: unknown;
 
         try {
             body = JSON.parse(request.toString());

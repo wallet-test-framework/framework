@@ -64,9 +64,9 @@ describe("getBlockTransactionCountByNumber", () => {
         assert.equal(
             mined?.blockNumber,
             blockNumber + 2,
-            `transaction block (${mined?.blockNumber}) matches mined block (${
-                blockNumber + 2
-            })`
+            `transaction block (${
+                mined?.blockNumber ?? "<none>"
+            }) matches mined block (${blockNumber + 2})`
         );
 
         const count0 = await wallet.send(
@@ -89,7 +89,7 @@ describe("getBlockTransactionCountByNumber", () => {
 
         assert.equal(parseInt(count1, 16), 2);
     });
-    it("behaves when given a nonexistant block", async () => {
+    it("behaves when given a nonexistent block", async () => {
         if (!blockchain || !wallet) {
             throw "not ready";
         }
