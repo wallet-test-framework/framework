@@ -20,7 +20,6 @@ function onMessage(ganache: EthereumProvider, evt: MessageEvent): void {
         .then((response) => reply.postMessage(response))
         .catch((error) => {
             console.error("Uncaught (in ganache worker thread)", error);
-            close();
         });
 }
 
