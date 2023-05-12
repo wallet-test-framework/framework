@@ -409,7 +409,7 @@ export class ManualGlue extends Glue {
             // wallet_addEthereumChain isn't exactly the safest endpoint, so we
             // don't expect wallets to implement it. We try optimistically but
             // fall back to human instructions if necessary.
-            console.debug("`wallet_addEthereumChain` failed, going manual");
+            console.debug("`wallet_addEthereumChain` failed, going manual", e);
         }
 
         await this.instruct(

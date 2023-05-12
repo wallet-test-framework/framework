@@ -123,12 +123,17 @@ function main() {
                         throw new TypeError("'method' in body not a string");
                     }
 
-                    if (!("params" in msg.body)) {
-                        throw new TypeError("'params' not in message body");
-                    }
+                    let params: unknown[];
+                    if ("params" in msg.body) {
+                        if (!(msg.body.params instanceof Array)) {
+                            throw new TypeError(
+                                "'params' in body not an array"
+                            );
+                        }
 
-                    if (!(msg.body.params instanceof Array)) {
-                        throw new TypeError("'params' in body not an array");
+                        params = msg.body.params;
+                    } else {
+                        params = [];
                     }
 
                     if (!("number" in msg)) {
@@ -137,7 +142,7 @@ function main() {
 
                     result.result = await blockchain.send(
                         msg.body.method,
-                        msg.body.params
+                        params
                     );
                     webSocket?.send(
                         JSON.stringify({
