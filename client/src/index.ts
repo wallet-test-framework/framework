@@ -135,7 +135,7 @@ function main() {
                         throw new TypeError("'number' not in message body");
                     }
 
-                    result.response = await blockchain.send(
+                    result.result = await blockchain.send(
                         msg.body.method,
                         msg.body.params
                     );
