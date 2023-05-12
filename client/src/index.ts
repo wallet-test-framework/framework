@@ -97,6 +97,8 @@ function main() {
                     const msg: unknown = JSON.parse(event.data);
                     console.log("received:", msg);
 
+                    const result: { [key: string]: unknown } = {};
+
                     if (!msg || typeof msg !== "object") {
                         throw new TypeError("received message not object");
                     }
@@ -109,8 +111,8 @@ function main() {
                         throw new TypeError("'body' not an object");
                     }
 
-                    if (!("id" in msg.body)) {
-                        throw new TypeError("'id' not in message body");
+                    if ("id" in msg.body) {
+                        result.id = msg.body.id;
                     }
 
                     if (!("method" in msg.body)) {
@@ -133,17 +135,14 @@ function main() {
                         throw new TypeError("'number' not in message body");
                     }
 
-                    const response: unknown = await blockchain.send(
+                    result.response = await blockchain.send(
                         msg.body.method,
                         msg.body.params
                     );
                     webSocket?.send(
                         JSON.stringify({
                             number: msg.number,
-                            result: {
-                                id: msg.body.id,
-                                result: response,
-                            },
+                            result,
                         })
                     );
                 })
