@@ -49,4 +49,14 @@ describe("newFilter", () => {
         await call.wait(1);
         await notEver(eventPromise);
     });
+
+    it("doesn't return events with different topic", async () => {
+        const eventPromise = new Promise(
+            (resolve) => void contract.once("Log", (args) => resolve(args))
+        );
+        const call = await contract.logSomethingElse(1234n);
+        await blockchain.send("evm_mine", [{ blocks: 1 }]);
+        await call.wait(1);
+        await notEver(eventPromise);
+    });
 });
