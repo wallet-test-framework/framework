@@ -66,6 +66,16 @@ export async function retry<F extends (...args: unknown[]) => Promise<R>, R>(
     return await Promise.race([timeout, runner()]);
 }
 
+export function notEver(promise: Promise<unknown>): Promise<void> {
+    const throwingPromise = promise.then(() => {
+        throw new Error("Promise resolved, but it shouldn't have");
+    });
+
+    const delayPromise = delay(30 * 1000);
+
+    return Promise.race([throwingPromise, delayPromise]);
+}
+
 export function spawn<R, T extends Array<U>, U>(
     f: (...args: T) => Promise<R>
 ): (...args: Parameters<typeof f>) => void {
