@@ -24,6 +24,7 @@ export async function run(
     await import("./tests/eth/getBalance");
     await import("./tests/eth/getTransactionByHash");
     await import("./tests/eth/newFilter");
+    await import("./tests/eth/getTransactionCount");
 
     mocha.run();
 }
