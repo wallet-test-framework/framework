@@ -1,13 +1,10 @@
-import { ethers } from "ethers";
+import { Chain, TestChain } from "./index";
 import mocha from "mocha/mocha.js";
 
-export let wallet: ethers.BrowserProvider | null;
-export let blockchain: ethers.BrowserProvider | null;
+export let wallet: Chain | null;
+export let blockchain: TestChain | null;
 
-export async function run(
-    myBlockchain: ethers.BrowserProvider,
-    myWallet: ethers.BrowserProvider
-) {
+export async function run(myBlockchain: TestChain, myWallet: Chain) {
     wallet = myWallet;
     blockchain = myBlockchain;
 

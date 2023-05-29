@@ -1,7 +1,7 @@
+import { RECEIVE_ABI, RECEIVE_BYTECODE } from "../../contracts/getBalance.sol";
 import * as tests from "../../tests";
-import Receive from "./getBalance.sol";
 import assert from "assert";
-import { ethers } from "ethers";
+import * as viem from "viem";
 
 const blockchain = tests.blockchain;
 const wallet = tests.wallet;
@@ -11,28 +11,51 @@ if (!blockchain || !wallet) {
 }
 
 describe("getBalance", () => {
-    let contract: ethers.Contract;
-    before(async () => {
-        const deployer = (await blockchain.listAccounts())[0];
-        const factory = ethers.ContractFactory.fromSolidity(
-            Receive.Receive,
-            deployer
-        );
+    let contractAddress: `0x${string}`;
+    let contract: viem.GetContractReturnType<
+        typeof RECEIVE_ABI,
+        typeof blockchain.public,
+        typeof blockchain.wallet
+    >;
 
-        contract = await factory.deploy();
-        await blockchain.send("evm_mine", [{ blocks: 1 }]);
-        await contract.deploymentTransaction()?.wait(1);
+    before(async () => {
+        const contractHash = await blockchain.wallet.deployContract({
+            abi: RECEIVE_ABI,
+            bytecode: RECEIVE_BYTECODE,
+        });
+
+        await blockchain.test.mine({ blocks: 1 });
+
+        const address = (
+            await blockchain.public.waitForTransactionReceipt({
+                hash: contractHash,
+            })
+        ).contractAddress;
+        if (address == null) {
+            throw "not deployed";
+        }
+        contractAddress = address;
+        contract = viem.getContract({
+            publicClient: blockchain.public,
+            walletClient: blockchain.wallet,
+            address,
+            abi: RECEIVE_ABI,
+        });
     });
 
     it("sending ether to address increases balance", async () => {
-        const src = (await blockchain.listAccounts())[0];
-        const dest = (await wallet.listAccounts())[0];
+        const src = (await blockchain.wallet.getAddresses())[0];
+        const dest = (await wallet.wallet.getAddresses())[0];
 
-        const balance = "0x100000000000000000000";
-        await blockchain.send("evm_setAccountBalance", [src.address, balance]);
+        const balance = 0x100000000000000000000n;
+        await blockchain.test.setBalance({ address: src, value: balance });
 
-        const walletInitalBalance = await wallet.getBalance(dest.address);
-        const ganacheInitalBalance = await blockchain.getBalance(dest.address);
+        const walletInitalBalance = await wallet.public.getBalance({
+            address: dest,
+        });
+        const ganacheInitalBalance = await blockchain.public.getBalance({
+            address: dest,
+        });
 
         assert.equal(
             walletInitalBalance.toString(),
@@ -41,21 +64,21 @@ describe("getBalance", () => {
         );
 
         const value = 1n;
-        const response = await src.sendTransaction({
+        const response = await blockchain.wallet.sendTransaction({
+            account: src,
             to: dest,
             value: value,
         });
 
-        await blockchain.send("evm_mine", [{ blocks: 5000 }]);
+        await blockchain.test.mine({ blocks: 5000 });
+        await wallet.public.waitForTransactionReceipt({ hash: response });
 
-        const transaction = await wallet.getTransaction(response.hash);
-        if (!transaction) {
-            throw "no transaction";
-        }
-        await transaction.wait(10);
-
-        const walletFinalBalance = await wallet.getBalance(dest.address);
-        const ganacheFinalBalance = await blockchain.getBalance(dest.address);
+        const walletFinalBalance = await wallet.public.getBalance({
+            address: dest,
+        });
+        const ganacheFinalBalance = await blockchain.public.getBalance({
+            address: dest,
+        });
 
         assert.equal(
             walletFinalBalance.toString(),
@@ -69,13 +92,17 @@ describe("getBalance", () => {
     });
 
     it("sending ether to contract increases balance", async () => {
-        const src = (await blockchain.listAccounts())[0];
+        const src = (await blockchain.wallet.getAddresses())[0];
 
-        const balance = "0x100000000000000000000";
-        await blockchain.send("evm_setAccountBalance", [src.address, balance]);
+        const balance = 0x100000000000000000000n;
+        await blockchain.test.setBalance({ address: src, value: balance });
 
-        const walletInitalBalance = await wallet.getBalance(contract);
-        const ganacheInitalBalance = await blockchain.getBalance(contract);
+        const walletInitalBalance = await wallet.public.getBalance({
+            address: contractAddress,
+        });
+        const ganacheInitalBalance = await blockchain.public.getBalance({
+            address: contractAddress,
+        });
 
         assert.equal(
             walletInitalBalance.toString(),
@@ -84,18 +111,18 @@ describe("getBalance", () => {
         );
 
         const value = 1n;
-        const response = await contract.give({ value });
+        const response = await contract.write.give({ value });
 
-        await blockchain.send("evm_mine", [{ blocks: 5000 }]);
+        await blockchain.test.mine({ blocks: 5000 });
 
-        const transaction = await wallet.getTransaction(response.hash);
-        if (!transaction) {
-            throw "no transaction";
-        }
-        await transaction.wait(10);
+        await wallet.public.waitForTransactionReceipt({ hash: response });
 
-        const walletFinalBalance = await wallet.getBalance(contract);
-        const ganacheFinalBalance = await blockchain.getBalance(contract);
+        const walletFinalBalance = await wallet.public.getBalance({
+            address: contractAddress,
+        });
+        const ganacheFinalBalance = await blockchain.public.getBalance({
+            address: contractAddress,
+        });
 
         assert.equal(
             walletFinalBalance.toString(),

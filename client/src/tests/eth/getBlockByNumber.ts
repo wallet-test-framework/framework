@@ -1,47 +1,43 @@
-import { blockchain, wallet } from "../../tests";
+import * as tests from "../../tests";
 import assert from "assert";
+
+const wallet = tests.wallet;
+const blockchain = tests.blockchain;
+
+if (!blockchain || !wallet) {
+    throw "not ready";
+}
 
 describe("getBlockByNumber", () => {
     it("returns the mined block", async () => {
-        if (!blockchain || !wallet) {
-            throw "not ready";
-        }
-
-        const src = (await blockchain.listAccounts())[0];
-        const dest = (await wallet.listAccounts())[0];
+        const dest = wallet.wallet.account;
 
         const value = 0n;
-        const response = await src.sendTransaction({
-            to: dest,
+        const response = await blockchain.wallet.sendTransaction({
+            to: dest.address,
             value: value,
         });
 
-        const blockNumber = Number.parseInt(
-            await blockchain.send("eth_blockNumber", []),
-            16
-        );
+        const blockNumber = await blockchain.public.getBlockNumber();
 
-        await blockchain.send("evm_mine", [{ blocks: 1 }]);
-        await response.wait(1);
+        await blockchain.test.mine({ blocks: 1 });
+        await blockchain.public.waitForTransactionReceipt({ hash: response });
 
-        const walletBlockByNumber = await wallet.getBlock(blockNumber + 1);
-        if (!walletBlockByNumber) {
-            throw "no block";
-        }
+        const walletBlockByNumber = await wallet.public.getBlock({
+            blockNumber: blockNumber + 1n,
+        });
 
-        assert.equal(walletBlockByNumber.transactions[0], response.hash);
+        assert.equal(walletBlockByNumber.transactions[0], response);
     });
 
     it("behaves well when the block doesn't exist", async () => {
-        if (!blockchain || !wallet) {
-            throw "not ready";
-        }
-
         const blockNumber =
-            "0x0000000000000f00000000000000000000000000000000000000000000000000";
+            0x0000000000000f00000000000000000000000000000000000000000000000000n;
 
-        const walletBlockByNumber = await wallet.getBlock(blockNumber);
-
-        assert.equal(walletBlockByNumber, null);
+        await assert.rejects(
+            wallet.public.getBlock({
+                blockNumber,
+            })
+        );
     });
 });

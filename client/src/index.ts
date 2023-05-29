@@ -2,19 +2,31 @@ import { ManualGlue } from "./glue";
 import * as tests from "./tests";
 import { spawn } from "./util";
 import { Glue } from "@wallet-test-framework/glue";
-import { ethers } from "ethers";
 import "mocha/mocha.css";
+import * as viem from "viem";
+
+type Eip1193Provider = Parameters<typeof viem.custom>[0];
+
+export interface Chain {
+    provider: Eip1193Provider;
+    public: viem.PublicClient<viem.Transport, viem.Chain>;
+    wallet: viem.WalletClient<viem.Transport, viem.Chain, viem.Account>;
+}
+
+export interface TestChain extends Chain {
+    test: viem.TestClient<"ganache", viem.Transport, viem.Chain>;
+}
 
 declare global {
     interface Window {
-        ethereum: ethers.Eip1193Provider;
+        ethereum: Eip1193Provider;
     }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Request = { method: string; params?: Array<any> | Record<string, any> };
 
-class GanacheWorkerProvider implements ethers.Eip1193Provider {
+class GanacheWorkerProvider implements Eip1193Provider {
     private worker: Worker;
 
     constructor(options: object) {
@@ -32,6 +44,24 @@ class GanacheWorkerProvider implements ethers.Eip1193Provider {
             this.worker.postMessage(request, [channel.port2]);
         });
     }
+}
+
+async function getAccount(provider: Eip1193Provider): Promise<`0x${string}`> {
+    const maybeAccounts: unknown = await provider.request({
+        method: "eth_accounts",
+        params: [],
+    });
+    if (!(maybeAccounts instanceof Array)) {
+        throw new Error("invalid accounts response");
+    }
+    if (typeof maybeAccounts[0] !== "string") {
+        throw new Error("no account");
+    }
+    const address: string = maybeAccounts[0];
+    if (!address.startsWith("0x")) {
+        throw new Error("not an address");
+    }
+    return address as `0x${string}`;
 }
 
 function main() {
@@ -52,15 +82,68 @@ function main() {
 
             const chainId = Math.floor(Math.random() * 32767) + 32767;
             const options = { chainId: chainId };
-            const blockchain = new ethers.BrowserProvider(
-                new GanacheWorkerProvider(options)
-            );
+            const chain = {
+                id: chainId,
+                name: "Test Chain",
+                network: "test-chain",
+                nativeCurrency: {
+                    decimals: 18,
+                    name: "testETH",
+                    symbol: "teth",
+                },
+                rpcUrls: {
+                    default: { http: [] },
+                    public: { http: [] },
+                },
+            };
 
-            await blockchain.send("miner_stop", []);
+            const provider = new GanacheWorkerProvider(options);
 
-            const network = await blockchain.getNetwork();
+            const transport = viem.custom(provider);
 
-            const wallet = new ethers.BrowserProvider(window.ethereum, "any");
+            const blockchain: TestChain = {
+                provider,
+                wallet: viem.createWalletClient({
+                    chain,
+                    transport,
+                    pollingInterval: 0,
+                    account: {
+                        address: await getAccount(provider),
+                        type: "json-rpc",
+                    } as const,
+                }),
+                public: viem.createPublicClient({
+                    chain,
+                    transport,
+                    pollingInterval: 0,
+                }),
+                test: viem.createTestClient({
+                    mode: "ganache",
+                    chain,
+                    transport,
+                    pollingInterval: 0,
+                }),
+            };
+
+            await blockchain.test.setAutomine(false);
+
+            const wallet: Chain = {
+                provider: window.ethereum,
+                wallet: viem.createWalletClient({
+                    chain,
+                    transport: viem.custom(window.ethereum),
+                    account: {
+                        address: await getAccount(window.ethereum),
+                        type: "json-rpc",
+                    } as viem.Account,
+                    pollingInterval: 0,
+                }),
+                public: viem.createPublicClient({
+                    chain,
+                    transport: viem.custom(window.ethereum),
+                    pollingInterval: 0,
+                }),
+            };
 
             let glue: Glue;
             const config = new URLSearchParams(window.location.hash);
@@ -140,10 +223,10 @@ function main() {
                         throw new TypeError("'number' not in message body");
                     }
 
-                    result.result = await blockchain.send(
-                        msg.body.method,
-                        params
-                    );
+                    result.result = await blockchain.provider.request({
+                        method: msg.body.method,
+                        params,
+                    });
                     webSocket?.send(
                         JSON.stringify({
                             number: msg.number,
@@ -157,7 +240,7 @@ function main() {
                 webSocket?.removeEventListener("open", open);
 
                 await glue.activateChain({
-                    chainId: "0x" + network.chainId.toString(16),
+                    chainId: "0x" + chainId.toString(16),
                     rpcUrl: rpcUrl.href,
                 });
 
@@ -171,7 +254,7 @@ function main() {
                     });
                 });
 
-                await wallet.send("eth_requestAccounts", []);
+                await wallet.wallet.requestAddresses();
                 unsubscribe();
                 if (requestAccountsPromise instanceof Promise) {
                     await requestAccountsPromise;
