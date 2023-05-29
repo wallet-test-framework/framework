@@ -1,34 +1,36 @@
-import { blockchain, wallet } from "../../tests";
+import * as tests from "../../tests";
 import assert from "assert";
+
+const blockchain = tests.blockchain;
+const wallet = tests.wallet;
+
+if (!blockchain || !wallet) {
+    throw "not ready";
+}
 
 describe("getTransctionByHash", () => {
     it("returns the same transaction as sent", async () => {
-        if (!blockchain || !wallet) {
-            throw "not ready";
-        }
-
-        const src = (await blockchain.listAccounts())[0];
-        const dest = (await wallet.listAccounts())[0];
+        const dest = wallet.wallet.account.address;
 
         const value = 0n;
-        const response = await src.sendTransaction({
+        const response = await blockchain.wallet.sendTransaction({
             to: dest,
             value: value,
         });
 
-        await blockchain.send("evm_mine", [{ blocks: 5000 }]);
-        await response.wait(10);
+        await blockchain.test.mine({ blocks: 5000 });
+        await blockchain.public.waitForTransactionReceipt({ hash: response });
 
-        const walletTransactionByHash = await wallet.getTransaction(
-            response.hash
+        const walletTransactionByHash = await wallet.public.getTransaction({
+            hash: response,
+        });
+
+        assert.equal(
+            walletTransactionByHash.from,
+            blockchain.wallet.account.address
         );
-        if (!walletTransactionByHash) {
-            throw "no transaction";
-        }
 
-        assert.equal(walletTransactionByHash.from, src.address);
-
-        assert.equal(walletTransactionByHash.to, dest.address);
+        assert.equal(walletTransactionByHash.to, dest);
 
         assert.equal(walletTransactionByHash.value, value);
     });

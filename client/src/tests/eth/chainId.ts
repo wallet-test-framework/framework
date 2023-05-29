@@ -1,15 +1,18 @@
-import { blockchain, wallet } from "../../tests";
+import * as tests from "../../tests";
 import assert from "assert";
+
+const wallet = tests.wallet;
+const blockchain = tests.blockchain;
+
+if (!blockchain || !wallet) {
+    throw "not ready";
+}
 
 describe("chainId", () => {
     it("returns the same chain Id", async () => {
-        if (!blockchain || !wallet) {
-            throw "not ready";
-        }
+        const walletChainId = await wallet.public.getChainId();
+        const ganacheChainId = await blockchain.public.getChainId();
 
-        const walletChainId = (await wallet.getNetwork()).chainId;
-        const ganacheChainId = (await wallet.getNetwork()).chainId;
-
-        assert.equal(walletChainId.toString(), ganacheChainId.toString());
+        assert.equal(walletChainId, ganacheChainId);
     });
 });

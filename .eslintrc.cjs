@@ -23,16 +23,6 @@ module.exports = {
             },
         },
         {
-            files: ["client/src/tests/**/*.ts"],
-            rules: {
-                // ethers.js contracts use `any`... a lot.
-                "@typescript-eslint/no-unsafe-argument": ["off"],
-                "@typescript-eslint/no-unsafe-assignment": ["off"],
-                "@typescript-eslint/no-unsafe-call": ["off"],
-                "@typescript-eslint/no-unsafe-member-access": ["off"],
-            },
-        },
-        {
             files: ["**/*.d.ts"],
             rules: {
                 "@typescript-eslint/no-explicit-any": ["off"],

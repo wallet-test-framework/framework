@@ -1,106 +1,82 @@
-import { blockchain, wallet } from "../../tests";
+import * as tests from "../../tests";
 import assert from "assert";
+
+const blockchain = tests.blockchain;
+const wallet = tests.wallet;
+
+if (!blockchain || !wallet) {
+    throw "not ready";
+}
 
 describe("getBlockTransactionCountByNumber", () => {
     it("returns zero for empty block", async () => {
-        if (!blockchain || !wallet) {
-            throw "not ready";
-        }
+        const blockNumber = await blockchain.public.getBlockNumber();
 
-        const blockNumber = Number.parseInt(
-            await blockchain.send("eth_blockNumber", []),
-            16
-        );
+        await blockchain.test.mine({ blocks: 1 });
 
-        await blockchain.send("evm_mine", [{ blocks: 1 }]);
+        const count = await wallet.public.getBlockTransactionCount({
+            blockNumber: blockNumber + 1n,
+        });
 
-        const count = await wallet.send(
-            "eth_getBlockTransactionCountByNumber",
-            [blockNumber + 1]
-        );
-        if (!count) {
-            throw "no block";
-        }
-
-        assert.equal(parseInt(count, 16), 0);
+        assert.equal(count, 0n);
     });
     it("returns the correct count of transactions", async () => {
-        if (!blockchain || !wallet) {
-            throw "not ready";
-        }
-
-        const src = (await blockchain.listAccounts())[0];
-        const dest = (await wallet.listAccounts())[0];
+        const dest = wallet.wallet.account.address;
 
         // Create a block with one transaction
         const value = 0n;
-        let response = await src.sendTransaction({
+        let response = await blockchain.wallet.sendTransaction({
             to: dest,
             value: value,
         });
 
-        const blockNumber = Number.parseInt(
-            await blockchain.send("eth_blockNumber", []),
-            16
-        );
+        const blockNumber = await blockchain.public.getBlockNumber();
 
-        await blockchain.send("evm_mine", [{ blocks: 1 }]);
-        await response.wait(1);
+        await blockchain.test.mine({ blocks: 1 });
+        await blockchain.public.waitForTransactionReceipt({ hash: response });
 
         // Create a block with two transactions
-        await src.sendTransaction({
+        await blockchain.wallet.sendTransaction({
             to: dest,
             value: value,
         });
 
-        response = await src.sendTransaction({
+        response = await blockchain.wallet.sendTransaction({
             to: dest,
             value: value,
         });
 
-        await blockchain.send("evm_mine", [{ blocks: 1 }]);
-        const mined = await response.wait(1);
+        await blockchain.test.mine({ blocks: 1 });
+        const mined = await blockchain.public.waitForTransactionReceipt({
+            hash: response,
+        });
 
         assert.equal(
             mined?.blockNumber,
-            blockNumber + 2,
+            blockNumber + 2n,
             `transaction block (${
                 mined?.blockNumber ?? "<none>"
-            }) matches mined block (${blockNumber + 2})`
+            }) matches mined block (${blockNumber + 2n})`
         );
 
-        const count0 = await wallet.send(
-            "eth_getBlockTransactionCountByNumber",
-            [blockNumber + 1]
-        );
-        if (!count0) {
-            throw "no block";
-        }
+        const count0 = await wallet.public.getBlockTransactionCount({
+            blockNumber: blockNumber + 1n,
+        });
 
-        assert.equal(parseInt(count0, 16), 1);
+        assert.equal(count0, 1n);
 
-        const count1 = await wallet.send(
-            "eth_getBlockTransactionCountByNumber",
-            [blockNumber + 2]
-        );
-        if (!count1) {
-            throw "no block";
-        }
+        const count1 = await wallet.public.getBlockTransactionCount({
+            blockNumber: blockNumber + 2n,
+        });
 
-        assert.equal(parseInt(count1, 16), 2);
+        assert.equal(count1, 2n);
     });
     it("behaves when given a nonexistent block", async () => {
-        if (!blockchain || !wallet) {
-            throw "not ready";
-        }
-
-        const count = await wallet.send(
-            "eth_getBlockTransactionCountByNumber",
-            [
-                "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-            ]
+        await assert.rejects(
+            wallet.public.getBlockTransactionCount({
+                blockNumber:
+                    0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffn,
+            })
         );
-
-        assert.equal(count, null);
     });
 });

@@ -1,3 +1,4 @@
+import { Chain } from "./index";
 import { delay } from "./util";
 import {
     ActivateChain,
@@ -10,7 +11,6 @@ import {
     SwitchEthereumChainEvent,
 } from "@wallet-test-framework/glue";
 import assert from "assert";
-import { ethers } from "ethers";
 
 type TemplateContext = { [key: string]: string | HTMLElement };
 
@@ -73,9 +73,9 @@ export class ManualGlue extends Glue {
     private readonly eventsElement: HTMLElement;
     private readonly instructionsElement: HTMLElement;
 
-    private readonly wallet: ethers.JsonRpcApiProvider;
+    private readonly wallet: Chain;
 
-    constructor(element: HTMLElement, wallet: ethers.JsonRpcApiProvider) {
+    constructor(element: HTMLElement, wallet: Chain) {
         super();
 
         this.wallet = wallet;
@@ -322,18 +322,22 @@ export class ManualGlue extends Glue {
         });
 
         try {
-            const addPromise = this.wallet.send("wallet_addEthereumChain", [
-                {
-                    chainId: action.chainId,
-                    chainName: `Test Chain ${action.chainId}`,
+            const addPromise = this.wallet.wallet.addChain({
+                chain: {
+                    id: Number.parseInt(action.chainId),
+                    name: `Test Chain ${action.chainId}`,
+                    network: "test-chain",
                     nativeCurrency: {
                         name: "teth",
                         symbol: "teth",
                         decimals: 18,
                     },
-                    rpcUrls: [action.rpcUrl],
+                    rpcUrls: {
+                        default: { http: [action.rpcUrl] },
+                        public: { http: [action.rpcUrl] },
+                    },
                 },
-            ]);
+            });
 
             const addEvent = await this.next("addethereumchain");
 
@@ -368,11 +372,9 @@ export class ManualGlue extends Glue {
                 let switched = false;
                 do {
                     try {
-                        await this.wallet.send("wallet_switchEthereumChain", [
-                            {
-                                chainId: action.chainId,
-                            },
-                        ]);
+                        await this.wallet.wallet.switchChain({
+                            id: Number.parseInt(action.chainId),
+                        });
                         switched = true;
                     } catch (e: unknown) {
                         if (e instanceof Error && "error" in e) {

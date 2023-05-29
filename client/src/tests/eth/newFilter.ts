@@ -1,8 +1,8 @@
+import { EMIT_ABI, EMIT_BYTECODE } from "../../contracts/newFilter.sol";
 import * as tests from "../../tests";
 import { notEver } from "../../util";
-import newFilter from "./newFilter.sol";
 import assert from "assert";
-import { ethers } from "ethers";
+import * as viem from "viem";
 
 const blockchain = tests.blockchain;
 const wallet = tests.wallet;
@@ -12,51 +12,120 @@ if (!blockchain || !wallet) {
 }
 
 describe("newFilter", () => {
-    let contract: ethers.Contract;
-    let contract2: ethers.Contract;
+    let contract0: viem.GetContractReturnType<
+        typeof EMIT_ABI,
+        typeof blockchain.public,
+        typeof blockchain.wallet
+    >;
+
+    let contract1: viem.GetContractReturnType<
+        typeof EMIT_ABI,
+        typeof blockchain.public,
+        typeof blockchain.wallet
+    >;
 
     before(async () => {
-        const deployer = (await blockchain.listAccounts())[0];
-        const factory = ethers.ContractFactory.fromSolidity(
-            newFilter.Emit,
-            deployer
-        );
+        const contractHash0 = await blockchain.wallet.deployContract({
+            abi: EMIT_ABI,
+            bytecode: EMIT_BYTECODE,
+            gas: 150000n,
+        });
+        const contractHash1 = await blockchain.wallet.deployContract({
+            abi: EMIT_ABI,
+            bytecode: EMIT_BYTECODE,
+            gas: 150000n,
+        });
 
-        contract = await factory.deploy();
-        contract2 = await factory.deploy();
-        await blockchain.send("evm_mine", [{ blocks: 1 }]);
-        await contract.deploymentTransaction()?.wait(1);
-        await contract2.deploymentTransaction()?.wait(1);
+        await blockchain.test.mine({ blocks: 1 });
+
+        const receipt0 = await blockchain.public.waitForTransactionReceipt({
+            hash: contractHash0,
+        });
+        const receipt1 = await blockchain.public.waitForTransactionReceipt({
+            hash: contractHash1,
+        });
+        if (receipt0.status !== "success" || receipt1.status !== "success") {
+            throw new Error(
+                `not deployed: ${receipt0.status} and ${receipt1.status}`
+            );
+        }
+
+        const address0 = receipt0.contractAddress;
+        const address1 = receipt1.contractAddress;
+
+        if (address0 == null || address1 == null) {
+            throw "not deployed";
+        }
+
+        contract0 = viem.getContract({
+            publicClient: blockchain.public,
+            walletClient: blockchain.wallet,
+            address: address0,
+            abi: EMIT_ABI,
+        });
+        contract1 = viem.getContract({
+            publicClient: blockchain.public,
+            walletClient: blockchain.wallet,
+            address: address1,
+            abi: EMIT_ABI,
+        });
     });
 
     it("returns events matching filter", async () => {
-        const eventPromise = new Promise(
-            (resolve) => void contract.once("Log", (args) => resolve(args))
-        );
-        const call = await contract.logSomething(1234n);
-        await blockchain.send("evm_mine", [{ blocks: 1 }]);
-        await call.wait(1);
+        const eventPromise = new Promise<viem.Log[]>((resolve) => {
+            const unwatch = contract0.watchEvent.Log(
+                {},
+                {
+                    pollingInterval: 100,
+                    onLogs: (a) => {
+                        unwatch();
+                        resolve(a);
+                    },
+                }
+            );
+        });
+        const call = await contract0.write.logSomething([1234n]);
+        await blockchain.test.mine({ blocks: 1 });
+        await wallet.public.waitForTransactionReceipt({ hash: call });
         const actual = await eventPromise;
-        assert.equal(actual, 1234n);
+        assert.equal(actual[0].topics[1], 1234n);
     });
 
     it("doesn't return events from different contract", async () => {
-        const eventPromise = new Promise(
-            (resolve) => void contract2.once("Log", (args) => resolve(args))
-        );
-        const call = await contract.logSomething(1234n);
-        await blockchain.send("evm_mine", [{ blocks: 1 }]);
-        await call.wait(1);
+        const eventPromise = new Promise((resolve) => {
+            const unwatch = contract1.watchEvent.Log(
+                {},
+                {
+                    pollingInterval: 100,
+                    onLogs: (a) => {
+                        unwatch();
+                        resolve(a);
+                    },
+                }
+            );
+        });
+        const call = await contract0.write.logSomething([1234n]);
+        await blockchain.test.mine({ blocks: 1 });
+        await wallet.public.waitForTransactionReceipt({ hash: call });
         await notEver(eventPromise);
     });
 
     it("doesn't return events with different topic", async () => {
-        const eventPromise = new Promise(
-            (resolve) => void contract.once("Log", (args) => resolve(args))
-        );
-        const call = await contract.logSomethingElse(1234n);
-        await blockchain.send("evm_mine", [{ blocks: 1 }]);
-        await call.wait(1);
+        const eventPromise = new Promise((resolve) => {
+            const unwatch = contract0.watchEvent.Log(
+                {},
+                {
+                    pollingInterval: 100,
+                    onLogs: (a) => {
+                        unwatch();
+                        resolve(a);
+                    },
+                }
+            );
+        });
+        const call = await contract0.write.logSomethingElse([1234n]);
+        await blockchain.test.mine({ blocks: 1 });
+        await wallet.public.waitForTransactionReceipt({ hash: call });
         await notEver(eventPromise);
     });
 });
