@@ -11,6 +11,7 @@ export async function run(myBlockchain: TestChain, myWallet: Chain) {
     mocha.setup({
         ui: "bdd",
         timeout: 10 * 60 * 1000,
+        slow: 60100
     });
     await import("./tests/eth/getBlockByHash");
     await import("./tests/eth/getBlockByNumber");
@@ -18,11 +19,12 @@ export async function run(myBlockchain: TestChain, myWallet: Chain) {
     await import("./tests/eth/getBlockTransactionCountByNumber");
     await import("./tests/eth/chainId");
     await import("./tests/eth/blockNumber");
-    await import("./tests/eth/getBalance");
-    await import("./tests/eth/getTransactionByHash");
     await import("./tests/eth/newFilter");
+    await import("./tests/eth/newBlockFilter");
+    await import("./tests/eth/getBalance");
     await import("./tests/eth/getTransactionCount");
     await import("./tests/eth/getCode");
+    await import("./tests/eth/getTransactionByHash");
 
     mocha.run();
 }
