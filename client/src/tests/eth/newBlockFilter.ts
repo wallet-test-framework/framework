@@ -20,7 +20,7 @@ describe("newBlockFilter", () => {
 
         const hashes = await wallet.public.getFilterChanges({ filter });
 
-        await wallet.public.uninstallFilter({filter});
+        await wallet.public.uninstallFilter({ filter });
         assert.deepEqual(hashes, [blockHash]);
     });
 });
