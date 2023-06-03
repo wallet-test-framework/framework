@@ -23,7 +23,7 @@ const options = {
     target: "es2020",
     format: "esm",
     platform: "browser",
-    minify: true,
+    minify: false,
     sourcemap: true,
 };
 
