@@ -35,7 +35,7 @@ describe("getTransctionByHash", () => {
         assert.equal(walletTransactionByHash.value, value);
     });
 
-    it("behaves when given a non existent transaction", async () => {
+    it("behaves when given a non-existent transaction", async () => {
         await assert.rejects(
             wallet.public.getTransaction({
                 hash: "0x0000000000000000000000000000000000000000000000000000000000000000",

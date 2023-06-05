@@ -27,6 +27,8 @@ export async function run(myBlockchain: TestChain, myWallet: Chain) {
     await import("./tests/eth/getCode");
     await import("./tests/eth/getTransactionByHash");
     await import("./tests/eth/getTransactionByBlockHashAndIndex");
+    await import("./tests/eth/getTransactionByBlockNumberAndIndex");
+    await import("./tests/eth/getTransactionReceipt");
 
     mocha.run();
 }
