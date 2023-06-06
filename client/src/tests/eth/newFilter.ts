@@ -128,4 +128,59 @@ describe("newFilter", () => {
         await wallet.public.waitForTransactionReceipt({ hash: call });
         await notEver(eventPromise);
     });
+
+    it("doesn't return events outside of block range", async () => {
+        const filter = await wallet.public.createEventFilter({
+            fromBlock:
+                0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffen,
+            toBlock:
+                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffn,
+        });
+        try {
+            const call = await contract0.write.logSomething([1234n]);
+            await blockchain.test.mine({ blocks: 1 });
+            await wallet.public.waitForTransactionReceipt({ hash: call });
+            const logs = await wallet.public.getFilterLogs({ filter });
+            assert.equal(logs.length, 0);
+        } finally {
+            await wallet.public.uninstallFilter({ filter });
+        }
+    });
+
+    it("returns events inside the block range", async () => {
+        const blockNumber = await wallet.public.getBlockNumber();
+        const filter = await wallet.public.createEventFilter({
+            fromBlock: blockNumber + 1n,
+            toBlock: blockNumber + 2n,
+        });
+        try {
+            const call = await contract0.write.logSomething([1234n]);
+            await blockchain.test.mine({ blocks: 1 });
+            const receipt = await wallet.public.waitForTransactionReceipt({
+                hash: call,
+            });
+            const logs = await wallet.public.getFilterLogs({ filter });
+            assert.equal(logs.length, 1);
+            assert.equal(logs[0].address, contract0.address);
+            assert.equal(logs[0].blockHash, receipt.blockHash);
+            assert.equal(logs[0].blockNumber, blockNumber + 1n);
+            assert.equal(
+                logs[0].topics[1],
+                "0x00000000000000000000000000000000000000000000000000000000000004d2"
+            );
+            assert.equal(logs[0].transactionHash, call);
+            assert.equal(logs[0].transactionIndex, receipt.transactionIndex);
+        } finally {
+            await wallet.public.uninstallFilter({ filter });
+        }
+    });
+
+    xit("behaves when given invalid block range", async () => {
+        await assert.rejects(
+            wallet.provider.request({
+                method: "eth_newFilter",
+                params: [{ fromBlock: "concrete", toBlock: "wood" }],
+            })
+        );
+    });
 });
