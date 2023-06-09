@@ -17,9 +17,15 @@ function onMessage(ganache: EthereumProvider, evt: MessageEvent): void {
         // message data conforms to the JSON RPC spec.
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         .request(evt.data)
-        .then((response) => reply.postMessage(response))
+        .then((result) => reply.postMessage({ result }))
         .catch((error) => {
             console.error("Uncaught (in ganache worker thread)", error);
+            reply.postMessage({
+                error: {
+                    message: String(error),
+                    code: -32000,
+                },
+            });
         });
 }
 
