@@ -39,7 +39,20 @@ class GanacheWorkerProvider implements Eip1193Provider {
     public request(request: Request): Promise<any> {
         return new Promise((res, rej) => {
             const channel = new MessageChannel();
-            channel.port1.onmessage = (evt) => res(evt.data);
+            channel.port1.onmessage = (evt) => {
+                const data: unknown = evt.data;
+                if (!data || typeof data !== "object") {
+                    return rej();
+                }
+
+                if ("result" in data) {
+                    return res(data.result);
+                } else if ("error" in data) {
+                    return rej(data.error);
+                } else {
+                    return rej();
+                }
+            };
             channel.port1.onmessageerror = (evt) => rej(evt.data);
             this.worker.postMessage(request, [channel.port2]);
         });
