@@ -236,10 +236,21 @@ function main() {
                         throw new TypeError("'number' not in message body");
                     }
 
-                    result.result = await blockchain.provider.request({
-                        method: msg.body.method,
-                        params,
-                    });
+                    try {
+                        result.result = await blockchain.provider.request({
+                            method: msg.body.method,
+                            params,
+                        });
+                    } catch (error: unknown) {
+                        webSocket?.send(
+                            JSON.stringify({
+                                number: msg.number,
+                                error,
+                            })
+                        );
+                        return;
+                    }
+
                     webSocket?.send(
                         JSON.stringify({
                             number: msg.number,
