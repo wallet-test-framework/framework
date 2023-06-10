@@ -242,13 +242,7 @@ function main() {
                             params,
                         });
                     } catch (error: unknown) {
-                        webSocket?.send(
-                            JSON.stringify({
-                                number: msg.number,
-                                error,
-                            })
-                        );
-                        return;
+                        result.error = error;
                     }
 
                     webSocket?.send(
