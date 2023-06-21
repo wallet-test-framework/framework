@@ -7,11 +7,14 @@ import * as viem from "viem";
 
 type Eip1193Provider = Parameters<typeof viem.custom>[0];
 
-export interface Chain {
+export interface AccountChain<A extends undefined | viem.Account> {
     provider: Eip1193Provider;
     public: viem.PublicClient<viem.Transport, viem.Chain>;
-    wallet: viem.WalletClient<viem.Transport, viem.Chain, viem.Account>;
+    wallet: viem.WalletClient<viem.Transport, viem.Chain, A>;
 }
+
+export type Chain = AccountChain<viem.Account>;
+export type AnyChain = AccountChain<undefined | viem.Account>;
 
 export interface TestChain extends Chain {
     test: viem.TestClient<"ganache", viem.Transport, viem.Chain>;
@@ -140,15 +143,11 @@ function main() {
 
             await blockchain.test.setAutomine(false);
 
-            const wallet: Chain = {
+            const unboundWallet: AccountChain<undefined> = {
                 provider: window.ethereum,
                 wallet: viem.createWalletClient({
                     chain,
                     transport: viem.custom(window.ethereum),
-                    account: {
-                        address: await getAccount(window.ethereum),
-                        type: "json-rpc",
-                    } as viem.Account,
                     pollingInterval: 0,
                 }),
                 public: viem.createPublicClient({
@@ -170,7 +169,7 @@ function main() {
                     throw "no #container element";
                 }
 
-                glue = new ManualGlue(glueElem, wallet);
+                glue = new ManualGlue(glueElem, unboundWallet);
             }
 
             const uuid = crypto.randomUUID();
@@ -272,11 +271,29 @@ function main() {
                     });
                 });
 
-                await wallet.wallet.requestAddresses();
+                await unboundWallet.wallet.requestAddresses();
                 unsubscribe();
                 if (requestAccountsPromise instanceof Promise) {
                     await requestAccountsPromise;
                 }
+
+                const wallet: Chain = {
+                    provider: window.ethereum,
+                    wallet: viem.createWalletClient({
+                        chain,
+                        transport: viem.custom(window.ethereum),
+                        account: {
+                            address: await getAccount(window.ethereum),
+                            type: "json-rpc",
+                        } as viem.Account,
+                        pollingInterval: 0,
+                    }),
+                    public: viem.createPublicClient({
+                        chain,
+                        transport: viem.custom(window.ethereum),
+                        pollingInterval: 0,
+                    }),
+                };
 
                 await tests.run(blockchain, wallet);
             });
