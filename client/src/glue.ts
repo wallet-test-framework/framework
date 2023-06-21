@@ -1,4 +1,4 @@
-import { Chain } from "./index";
+import { AnyChain } from "./index";
 import { delay } from "./util";
 import {
     ActivateChain,
@@ -73,9 +73,9 @@ export class ManualGlue extends Glue {
     private readonly eventsElement: HTMLElement;
     private readonly instructionsElement: HTMLElement;
 
-    private readonly wallet: Chain;
+    private readonly wallet: AnyChain;
 
-    constructor(element: HTMLElement, wallet: Chain) {
+    constructor(element: HTMLElement, wallet: AnyChain) {
         super();
 
         this.wallet = wallet;
