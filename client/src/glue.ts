@@ -4,6 +4,7 @@ import {
     ActivateChain,
     AddEthereumChain,
     AddEthereumChainEvent,
+    EventMap,
     Glue,
     RequestAccounts,
     RequestAccountsEvent,
@@ -11,6 +12,26 @@ import {
     SwitchEthereumChainEvent,
 } from "@wallet-test-framework/glue";
 import assert from "assert";
+import { Client as WebSocketClient } from "rpc-websockets";
+
+type Events = { [k in keyof EventMap]: null };
+
+const EVENTS: (keyof Events)[] = (() => {
+    const helper: Events = {
+        requestaccounts: null,
+        addethereumchain: null,
+        switchethereumchain: null,
+    } as const;
+
+    const events: (keyof Events)[] = [];
+
+    let key: keyof Events;
+    for (key in helper) {
+        events.push(key);
+    }
+
+    return events;
+})();
 
 type TemplateContext = { [key: string]: string | HTMLElement };
 
@@ -450,5 +471,65 @@ export class ManualGlue extends Glue {
 
             this.instructionsElement.replaceChildren(instruct);
         });
+    }
+}
+
+export class WebSocketGlue extends Glue {
+    private readonly client: WebSocketClient;
+
+    public static async connect(address: string): Promise<WebSocketGlue> {
+        const self = new WebSocketGlue(address);
+
+        const open = new Promise((res, rej) => {
+            try {
+                self.client.once("open", res);
+            } catch (e: unknown) {
+                rej(e);
+            }
+        });
+
+        self.client.connect();
+
+        await open;
+
+        for (const key of EVENTS) {
+            self.client.on(key, (evt) => self.handle(key, evt));
+            await self.client.subscribe(key);
+        }
+
+        return self;
+    }
+
+    private constructor(address: string) {
+        super();
+        this.client = new WebSocketClient(address);
+    }
+
+    private handle(key: keyof EventMap, evt: unknown): void {
+        if (!evt || typeof evt !== "object") {
+            throw new TypeError("Event argument not object");
+        }
+
+        // TODO: Validate the event object is correct.
+
+        /* eslint-disable-next-line @typescript-eslint/no-unsafe-argument,
+                                    @typescript-eslint/no-explicit-any */
+        this.emit(key, evt as any);
+    }
+
+    async activateChain(action: ActivateChain): Promise<void> {
+        await this.client.call("activateChain", [action]);
+    }
+
+    async requestAccounts(action: RequestAccounts): Promise<void> {
+        await this.client.call("requestAccounts", [action]);
+    }
+
+    async switchEthereumChain(action: SwitchEthereumChain): Promise<void> {
+        await this.client.call("switchEthereumChain", [action]);
+    }
+
+    async addEthereumChain(action: AddEthereumChain): Promise<void> {
+        await this.client.call("addEthereumChain", [action]);
     }
 }
