@@ -5,6 +5,12 @@ module.exports = {
         "plugin:@typescript-eslint/recommended-requiring-type-checking",
         "prettier",
     ],
+    rules: {
+        "@typescript-eslint/no-unused-vars": [
+            "warn",
+            { argsIgnorePattern: "^_" },
+        ],
+    },
     parser: "@typescript-eslint/parser",
     plugins: ["@typescript-eslint"],
     root: true,

@@ -1,4 +1,4 @@
-import { ManualGlue } from "./glue";
+import { ManualGlue, WebSocketGlue } from "./glue";
 import * as tests from "./tests";
 import { spawn } from "./util";
 import { Glue } from "@wallet-test-framework/glue";
@@ -87,6 +87,9 @@ function main() {
         throw "no #connect element";
     }
 
+    // Reload the page when the glue address changes.
+    window.addEventListener("hashchange", () => window.location.reload());
+
     let webSocket: WebSocket | null;
 
     connect.addEventListener(
@@ -158,11 +161,11 @@ function main() {
             };
 
             let glue: Glue;
-            const config = new URLSearchParams(window.location.hash);
+            const config = new URLSearchParams(window.location.hash.slice(1));
             const wsGlueAddress = config.get("glue");
 
             if (wsGlueAddress) {
-                throw new Error("not implemented");
+                glue = await WebSocketGlue.connect(wsGlueAddress);
             } else {
                 const glueElem = document.getElementById("container");
                 if (!glueElem) {
