@@ -20,6 +20,10 @@ export interface TestChain extends Chain {
     test: viem.TestClient<"ganache", viem.Transport, viem.Chain>;
 }
 
+export interface WalletChain extends Chain {
+    glue: Glue;
+}
+
 declare global {
     interface Window {
         ethereum: Eip1193Provider;
@@ -280,7 +284,7 @@ function main() {
                     await requestAccountsPromise;
                 }
 
-                const wallet: Chain = {
+                const wallet: WalletChain = {
                     provider: window.ethereum,
                     wallet: viem.createWalletClient({
                         chain,
@@ -296,6 +300,7 @@ function main() {
                         transport: viem.custom(window.ethereum),
                         pollingInterval: 0,
                     }),
+                    glue,
                 };
 
                 await tests.run(blockchain, wallet);

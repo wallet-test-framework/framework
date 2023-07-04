@@ -8,6 +8,8 @@ import {
     Glue,
     RequestAccounts,
     RequestAccountsEvent,
+    SignMessage,
+    SignMessageEvent,
     SwitchEthereumChain,
     SwitchEthereumChainEvent,
 } from "@wallet-test-framework/glue";
@@ -21,6 +23,7 @@ const EVENTS: (keyof Events)[] = (() => {
         requestaccounts: null,
         addethereumchain: null,
         switchethereumchain: null,
+        signmessage: null,
     } as const;
 
     const events: (keyof Events)[] = [];
@@ -84,6 +87,7 @@ abstract class Template extends HTMLElement {
 const ActivateChainTemplate = Template.define("wtf-activate-chain");
 const InstructTemplate = Template.define("wtf-instruct");
 const RequestAccountsTemplate = Template.define("wtf-request-accounts");
+const SignMessageTemplate = Template.define("wtf-sign-message");
 const AddEthereumChainTemplate = Template.define("wtf-add-ethereum-chain");
 const SwitchEthereumChainTemplate = Template.define(
     "wtf-switch-ethereum-chain"
@@ -201,6 +205,20 @@ export class ManualGlue extends Glue {
         );
     }
 
+    private emitSignMessage(data: Map<string, string>) {
+        const message = data.get("message");
+        if (typeof message !== "string") {
+            throw "form missing message";
+        }
+
+        const domain = data.get("domain");
+        if (typeof domain !== "string") {
+            throw "form missing domain";
+        }
+
+        this.emit("signmessage", new SignMessageEvent(domain, { message }));
+    }
+
     private attachEvents(): void {
         const dialogs = this.eventsElement.querySelectorAll("dialog");
 
@@ -210,6 +228,7 @@ export class ManualGlue extends Glue {
 
         const handlers: Handlers = {
             "request-accounts": (d) => this.emitRequestAccounts(d),
+            "sign-message": (d) => this.emitSignMessage(d),
             "add-ethereum-chain": (d) => this.emitAddEthereumChain(d),
             "switch-ethereum-chain": (d) => this.emitSwitchEthereumChain(d),
         };
@@ -318,6 +337,18 @@ export class ManualGlue extends Glue {
             new RequestAccountsTemplate({
                 id: action.id,
                 accounts: list,
+            })
+        );
+    }
+
+    override async signMessage(action: SignMessage): Promise<void> {
+        if (action.action !== "approve") {
+            throw "not implemented";
+        }
+
+        await this.instruct(
+            new SignMessageTemplate({
+                id: action.id,
             })
         );
     }
@@ -531,5 +562,9 @@ export class WebSocketGlue extends Glue {
 
     async addEthereumChain(action: AddEthereumChain): Promise<void> {
         await this.client.call("addEthereumChain", [action]);
+    }
+
+    async signMessage(action: SignMessage): Promise<void> {
+        await this.client.call("signMessage", [action]);
     }
 }
