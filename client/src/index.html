@@ -247,6 +247,42 @@
                                 </form>
                             </dialog>
                         </li>
+                        <li>
+                            <button>Sign Message</button>
+                            <dialog data-event="sign-message">
+                                <form method="dialog">
+                                    <label>
+                                        Domain:
+                                        <input
+                                            required=""
+                                            name="domain"
+                                            placeholder="example.com"
+                                            pattern="[-a-zA-Z0-9\.]+"
+                                            spellcheck="false"
+                                        />
+                                    </label>
+                                    <label>
+                                        Message:
+                                        <textarea
+                                            required=""
+                                            name="message"
+                                            spellcheck="false"
+                                        ></textarea>
+                                    </label>
+                                    <div>
+                                        <button
+                                            formnovalidate=""
+                                            type="submit"
+                                            name="cancel"
+                                            value="cancel"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button type="submit">Submit</button>
+                                    </div>
+                                </form>
+                            </dialog>
+                        </li>
                     </ul>
                 </div>
             </section>
@@ -303,6 +339,15 @@
                         to the following account(s):
                     </p>
                     <slot name="accounts"></slot>
+                </template>
+                <template id="wtf-sign-message">
+                    <h3>Sign Message</h3>
+                    <p>
+                        Your wallet should be showing a sign message request
+                        from
+                        <strong><slot name="id"></slot></strong>. Approve this
+                        request.
+                    </p>
                 </template>
                 <template id="wtf-instruct">
                     <section>

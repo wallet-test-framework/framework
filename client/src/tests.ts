@@ -1,10 +1,10 @@
-import { Chain, TestChain } from "./index";
+import { TestChain, WalletChain } from "./index";
 import mocha from "mocha/mocha.js";
 
-export let wallet: Chain | null;
+export let wallet: WalletChain | null;
 export let blockchain: TestChain | null;
 
-export async function run(myBlockchain: TestChain, myWallet: Chain) {
+export async function run(myBlockchain: TestChain, myWallet: WalletChain) {
     wallet = myWallet;
     blockchain = myBlockchain;
 
@@ -25,6 +25,7 @@ export async function run(myBlockchain: TestChain, myWallet: Chain) {
     await import("./tests/eth/uninstallFilter");
     await import("./tests/eth/getFilterChanges");
     await import("./tests/eth/getFilterLogs");
+    await import("./tests/eth/sign");
     await import("./tests/eth/getBalance");
     await import("./tests/eth/getStorageAt");
     await import("./tests/eth/getTransactionCount");
