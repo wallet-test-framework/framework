@@ -346,6 +346,67 @@
                                 </form>
                             </dialog>
                         </li>
+                        <li>
+                            <button>Sign Transaction</button>
+                            <dialog data-event="sign-transaction">
+                                <form method="dialog">
+                                    <label>
+                                        Domain:
+                                        <input
+                                            required=""
+                                            name="domain"
+                                            placeholder="example.com"
+                                            pattern="[-a-zA-Z0-9\.]+"
+                                            spellcheck="false"
+                                        />
+                                    </label>
+                                    <label>
+                                        From:
+                                        <input
+                                            required=""
+                                            name="from"
+                                            spellcheck="false"
+                                        />
+                                    </label>
+                                    <label>
+                                        To:
+                                        <input
+                                            required=""
+                                            name="to"
+                                            spellcheck="false"
+                                        />
+                                    </label>
+                                    <label>
+                                        Value:
+                                        <input
+                                            required=""
+                                            name="value"
+                                            spellcheck="false"
+                                            value="1100000000000000000"
+                                        />
+                                    </label>
+                                    <label>
+                                        Data:
+                                        <input
+                                            required=""
+                                            name="data"
+                                            spellcheck="false"
+                                        />
+                                    </label>
+                                    <div>
+                                        <button
+                                            formnovalidate=""
+                                            type="submit"
+                                            name="cancel"
+                                            value="cancel"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button type="submit">Submit</button>
+                                    </div>
+                                </form>
+                            </dialog>
+                        </li>
                     </ul>
                 </div>
             </section>
@@ -416,6 +477,15 @@
                     <h3>Send Transaction</h3>
                     <p>
                         Your wallet should be showing a send transaction request
+                        from
+                        <strong><slot name="id"></slot></strong>. Approve this
+                        request.
+                    </p>
+                </template>
+                <template id="wtf-sign-transaction">
+                    <h3>Sign Transaction</h3>
+                    <p>
+                        Your wallet should be showing a sign transaction request
                         from
                         <strong><slot name="id"></slot></strong>. Approve this
                         request.
