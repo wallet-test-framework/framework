@@ -8,6 +8,8 @@ import {
     Glue,
     RequestAccounts,
     RequestAccountsEvent,
+    SendTransaction,
+    SendTransactionEvent,
     SignMessage,
     SignMessageEvent,
     SwitchEthereumChain,
@@ -24,6 +26,7 @@ const EVENTS: (keyof Events)[] = (() => {
         addethereumchain: null,
         switchethereumchain: null,
         signmessage: null,
+        sendtransaction: null,
     } as const;
 
     const events: (keyof Events)[] = [];
@@ -88,6 +91,7 @@ const ActivateChainTemplate = Template.define("wtf-activate-chain");
 const InstructTemplate = Template.define("wtf-instruct");
 const RequestAccountsTemplate = Template.define("wtf-request-accounts");
 const SignMessageTemplate = Template.define("wtf-sign-message");
+const SendTransactionTemplate = Template.define("wtf-send-transaction");
 const AddEthereumChainTemplate = Template.define("wtf-add-ethereum-chain");
 const SwitchEthereumChainTemplate = Template.define(
     "wtf-switch-ethereum-chain"
@@ -219,6 +223,38 @@ export class ManualGlue extends Glue {
         this.emit("signmessage", new SignMessageEvent(domain, { message }));
     }
 
+    private emitSendTransaction(data: Map<string, string>) {
+        const from = data.get("from");
+        if (typeof from !== "string") {
+            throw "form missing from";
+        }
+
+        const to = data.get("to");
+        if (typeof to !== "string") {
+            throw "form missing to";
+        }
+
+        const data_ = data.get("data");
+        if (typeof data_ !== "string") {
+            throw "form missing data";
+        }
+
+        const value = data.get("value");
+        if (typeof value !== "string") {
+            throw "form missing value";
+        }
+
+        const domain = data.get("domain");
+        if (typeof domain !== "string") {
+            throw "form missing domain";
+        }
+
+        this.emit(
+            "sendtransaction",
+            new SendTransactionEvent(domain, { from, to, value, data: data_ })
+        );
+    }
+
     private attachEvents(): void {
         const dialogs = this.eventsElement.querySelectorAll("dialog");
 
@@ -229,6 +265,7 @@ export class ManualGlue extends Glue {
         const handlers: Handlers = {
             "request-accounts": (d) => this.emitRequestAccounts(d),
             "sign-message": (d) => this.emitSignMessage(d),
+            "send-transaction": (d) => this.emitSendTransaction(d),
             "add-ethereum-chain": (d) => this.emitAddEthereumChain(d),
             "switch-ethereum-chain": (d) => this.emitSwitchEthereumChain(d),
         };
@@ -348,6 +385,18 @@ export class ManualGlue extends Glue {
 
         await this.instruct(
             new SignMessageTemplate({
+                id: action.id,
+            })
+        );
+    }
+
+    override async sendTransaction(action: SendTransaction): Promise<void> {
+        if (action.action !== "approve") {
+            throw "not implemented";
+        }
+
+        await this.instruct(
+            new SendTransactionTemplate({
                 id: action.id,
             })
         );
@@ -566,5 +615,9 @@ export class WebSocketGlue extends Glue {
 
     async signMessage(action: SignMessage): Promise<void> {
         await this.client.call("signMessage", [action]);
+    }
+
+    async sendTransaction(action: SendTransaction): Promise<void> {
+        await this.client.call("sendTransaction", [action]);
     }
 }

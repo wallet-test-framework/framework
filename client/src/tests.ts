@@ -26,6 +26,7 @@ export async function run(myBlockchain: TestChain, myWallet: WalletChain) {
     await import("./tests/eth/getFilterChanges");
     await import("./tests/eth/getFilterLogs");
     await import("./tests/eth/sign");
+    await import("./tests/eth/sendTransaction");
     await import("./tests/eth/getBalance");
     await import("./tests/eth/getStorageAt");
     await import("./tests/eth/getTransactionCount");
