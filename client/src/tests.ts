@@ -44,6 +44,7 @@ export async function run(myBlockchain: TestChain, myWallet: WalletChain) {
     await import("./tests/eth/sendRawTransaction");
     await import("./tests/eth/sendTransaction");
     await import("./tests/eth/sign");
+    await import("./tests/eth/signTransaction");
     await import("./tests/eth/uninstallFilter");
 
     mocha.run();
