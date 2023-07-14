@@ -1,5 +1,6 @@
 import * as tests from "../../tests";
 import { retry } from "../../util";
+import { parseTransaction, serializeTransaction, recoverAddress } from "viem";
 import assert from "assert";
 
 const blockchain = tests.blockchain;
@@ -25,10 +26,13 @@ describe("signTransaction", () => {
         });
 
         const value = 1100000000000000000n;
-        const responsePromise = wallet.wallet.signTransaction({
-            account: sender,
-            to: sender,
-            value: value,
+        const responsePromise = wallet.provider.request({
+            method: "eth_signTransaction",
+            params: [{
+                account: sender,
+                to: sender,
+                value: value.toString(),
+            }]
         });
 
         const signEvent = await wallet.glue.next("signtransaction");
@@ -55,6 +59,31 @@ describe("signTransaction", () => {
         });
 
         const response = await responsePromise;
-        throw "banaba";
+        //TODO: Don't add 0x prefix
+        const fmtTransaction = `0x${response}` as const;
+        const transaction = parseTransaction(fmtTransaction);
+
+        assert.equal(transaction.chainId, blockchain.public.chain.id);
+        assert.equal(transaction.value, value);
+        assert.equal(transaction.to, sender);
+
+        let hash;
+        let v = transaction.v;
+        const r = transaction.r;
+        const s = transaction.s;
+
+        if (v === 27n || v === 28n) {
+            v -= 27n;
+            hash = "";
+        } else {
+            const chainId = BigInt(transaction.chainId || 0);
+            assert.ok(v == 35n + chainId * 2n || v == 36n + chainId * 2n);
+            v = v - 35n - chainId * 2n;
+            hash = "";
+        }
+        const address = await recoverAddress({
+                hash:,
+                signature:,
+            });
     });
 });
