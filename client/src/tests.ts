@@ -20,6 +20,8 @@ export async function run(myBlockchain: TestChain, myWallet: WalletChain) {
     await import("./tests/eth/chainId");
     await import("./tests/eth/blockNumber");
     await import("./tests/eth/newFilter");
+    await import("./tests/eth/estimateGas");
+    await import("./tests/eth/feeHistory");
     await import("./tests/eth/newBlockFilter");
     await import("./tests/eth/newPendingTransactionFilter");
     await import("./tests/eth/uninstallFilter");
