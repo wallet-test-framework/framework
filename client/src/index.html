@@ -248,42 +248,6 @@
                             </dialog>
                         </li>
                         <li>
-                            <button>Sign Message</button>
-                            <dialog data-event="sign-message">
-                                <form method="dialog">
-                                    <label>
-                                        Domain:
-                                        <input
-                                            required=""
-                                            name="domain"
-                                            placeholder="example.com"
-                                            pattern="[-a-zA-Z0-9\.]+"
-                                            spellcheck="false"
-                                        />
-                                    </label>
-                                    <label>
-                                        Message:
-                                        <textarea
-                                            required=""
-                                            name="message"
-                                            spellcheck="false"
-                                        ></textarea>
-                                    </label>
-                                    <div>
-                                        <button
-                                            formnovalidate=""
-                                            type="submit"
-                                            name="cancel"
-                                            value="cancel"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button type="submit">Submit</button>
-                                    </div>
-                                </form>
-                            </dialog>
-                        </li>
-                        <li>
                             <button>Send Transaction</button>
                             <dialog data-event="send-transaction">
                                 <form method="dialog">
@@ -328,6 +292,42 @@
                                             name="data"
                                             spellcheck="false"
                                         />
+                                    </label>
+                                    <div>
+                                        <button
+                                            formnovalidate=""
+                                            type="submit"
+                                            name="cancel"
+                                            value="cancel"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button type="submit">Submit</button>
+                                    </div>
+                                </form>
+                            </dialog>
+                        </li>
+                        <li>
+                            <button>Sign Message</button>
+                            <dialog data-event="sign-message">
+                                <form method="dialog">
+                                    <label>
+                                        Domain:
+                                        <input
+                                            required=""
+                                            name="domain"
+                                            placeholder="example.com"
+                                            pattern="[-a-zA-Z0-9\.]+"
+                                            spellcheck="false"
+                                        />
+                                    </label>
+                                    <label>
+                                        Message:
+                                        <textarea
+                                            required=""
+                                            name="message"
+                                            spellcheck="false"
+                                        ></textarea>
                                     </label>
                                     <div>
                                         <button
