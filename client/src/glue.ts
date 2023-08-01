@@ -10,10 +10,10 @@ import {
     RequestAccountsEvent,
     SendTransaction,
     SendTransactionEvent,
-    SignTransaction,
-    SignTransactionEvent,
     SignMessage,
     SignMessageEvent,
+    SignTransaction,
+    SignTransactionEvent,
     SwitchEthereumChain,
     SwitchEthereumChainEvent,
 } from "@wallet-test-framework/glue";
