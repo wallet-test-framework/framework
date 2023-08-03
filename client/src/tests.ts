@@ -13,9 +13,11 @@ export async function run(myBlockchain: TestChain, myWallet: WalletChain) {
         timeout: 10 * 60 * 1000,
         slow: 60100,
     });
+    await import("./tests/eth/accounts");
     await import("./tests/eth/blockNumber");
     await import("./tests/eth/call");
     await import("./tests/eth/chainId");
+    await import("./tests/eth/createAccessList");
     await import("./tests/eth/estimateGas");
     await import("./tests/eth/feeHistory");
     await import("./tests/eth/gasPrice");
