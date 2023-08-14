@@ -253,6 +253,7 @@ function main() {
 
                     webSocket?.send(
                         JSON.stringify({
+                            jsonrpc: "2.0",
                             number: msg.number,
                             result,
                         })
