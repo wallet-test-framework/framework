@@ -41,7 +41,7 @@ describe("signTransaction", () => {
                     {
                         account: sender,
                         to: sender,
-                        value: value.toString(),
+                        value: "0x" + value.toString(16),
                     },
                 ],
             });
