@@ -39,7 +39,7 @@ describe("signTransaction", () => {
                 method: "eth_signTransaction",
                 params: [
                     {
-                        account: sender,
+                        from: sender,
                         to: sender,
                         value: "0x" + value.toString(16),
                     },
