@@ -472,24 +472,42 @@ export class ManualGlue extends Glue {
         });
 
         try {
-            const addPromise = this.wallet.wallet.addChain({
-                chain: {
-                    id: Number.parseInt(action.chainId),
-                    name: `Test Chain ${action.chainId}`,
-                    network: "test-chain",
-                    nativeCurrency: {
-                        name: "teth",
-                        symbol: "teth",
-                        decimals: 18,
-                    },
-                    rpcUrls: {
-                        default: { http: [action.rpcUrl] },
-                        public: { http: [action.rpcUrl] },
-                    },
-                },
-            });
+            let addComplete = false;
+            let eventComplete = false;
 
-            const addEvent = await this.next("addethereumchain");
+            const addPromise = this.wallet.wallet
+                .addChain({
+                    chain: {
+                        id: Number.parseInt(action.chainId),
+                        name: `Test Chain ${action.chainId}`,
+                        network: "test-chain",
+                        nativeCurrency: {
+                            name: "teth",
+                            symbol: "teth",
+                            decimals: 18,
+                        },
+                        rpcUrls: {
+                            default: { http: [action.rpcUrl] },
+                            public: { http: [action.rpcUrl] },
+                        },
+                    },
+                })
+                .finally(() => {
+                    addComplete = true;
+                });
+
+            const eventPromise = this.next("addethereumchain").finally(() => {
+                eventComplete = true;
+            });
+            await Promise.race([addPromise, eventPromise]);
+
+            if (addComplete) {
+                await addPromise;
+            } else {
+                assert.ok(eventComplete, "Promise.race broken?");
+            }
+
+            const addEvent = await eventPromise;
 
             assert.strictEqual(
                 addEvent.rpcUrls.length,
