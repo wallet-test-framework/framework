@@ -100,7 +100,7 @@ describe("getProof", () => {
                 params: [
                     "0x0000000000000000000000000000000000000000",
                     ["0x00"],
-                    blockNumber,
+                    blockNumber.toString(16),
                 ],
             })
         );
@@ -111,7 +111,7 @@ describe("getProof", () => {
                 params: [
                     "0x0000000000000000000000000000000000000000",
                     ["0x00"],
-                    blockNumber,
+                    blockNumber.toString(16),
                 ],
             })
         );
@@ -140,17 +140,18 @@ describe("getProof", () => {
 
         await wallet.public.waitForTransactionReceipt({ hash: response });
 
+        const nextBlockNumberHex = "0x" + (blockNumber + 1n).toString(16);
         const fromBlockchain = asProof(
             await blockchain.provider.request({
                 method: "eth_getProof",
-                params: [contractAddress, ["0x00"], blockNumber + 1n],
+                params: [contractAddress, ["0x00"], nextBlockNumberHex],
             })
         );
 
         const fromWallet = asProof(
             await wallet.provider.request({
                 method: "eth_getProof",
-                params: [contractAddress, ["0x00"], blockNumber + 1n],
+                params: [contractAddress, ["0x00"], nextBlockNumberHex],
             })
         );
 
