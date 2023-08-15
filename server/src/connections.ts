@@ -53,6 +53,7 @@ export class Connections {
     public wsConnect(key: string, ws: WebSocket): void {
         ws.on("close", () => this.delete(key));
         ws.on("error", () => this.delete(key));
+        ws.on("pong", () => console.debug("Pong", key));
 
         const state = new ClientState(ws);
         const maybeClient = this.connections.get(key);

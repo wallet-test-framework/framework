@@ -66,3 +66,9 @@ wss.on("connection", (ws, req) => {
 
     connections.wsConnect(url.slice(1), ws);
 });
+
+setInterval(() => {
+    wss.clients.forEach((client) => {
+        client.ping();
+    });
+}, 25000);
