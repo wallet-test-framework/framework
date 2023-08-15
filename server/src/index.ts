@@ -71,4 +71,4 @@ setInterval(() => {
     wss.clients.forEach((client) => {
         client.ping();
     });
-}, 25000);
+}, 10000);
