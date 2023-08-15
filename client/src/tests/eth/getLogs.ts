@@ -68,10 +68,8 @@ describe("getLogs", () => {
         await blockchain.test.mine({ blocks: 1 });
         await wallet.public.waitForTransactionReceipt({ hash: call });
         const logs = await wallet.public.getLogs({
-            fromBlock:
-                0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffen,
-            toBlock:
-                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffn,
+            fromBlock: 0x01ffffffffffffen,
+            toBlock: 0x01fffffffffffffn,
         });
         assert.equal(logs.length, 0);
     });
