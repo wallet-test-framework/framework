@@ -66,10 +66,8 @@ describe("getFilterChanges", () => {
 
     it("doesn't return events outside of block range", async () => {
         const filter = await wallet.public.createEventFilter({
-            fromBlock:
-                0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffen,
-            toBlock:
-                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffn,
+            fromBlock: 0x01ffffffffffffen,
+            toBlock: 0x01fffffffffffffn,
         });
         try {
             const call = await contract0.write.logSomething([1234n]);
