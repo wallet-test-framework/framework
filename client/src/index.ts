@@ -150,7 +150,7 @@ function main() {
 
             await blockchain.test.setAutomine(false);
 
-            const unboundWallet: AccountChain<undefined> = {
+            const unboundWallet: AccountChain<undefined | viem.Account> = {
                 provider: window.ethereum,
                 wallet: viem.createWalletClient({
                     chain,
