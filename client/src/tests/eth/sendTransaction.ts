@@ -70,17 +70,17 @@ describe("sendTransaction", () => {
         assert.equal(
             sendEvent.from.toUpperCase(),
             sender.toUpperCase(),
-            `event's from (${sendEvent.from}) matches request (${sender})`
+            `event's from (${sendEvent.from}) matches request (${sender})`,
         );
         assert.equal(
             sendEvent.to.toUpperCase(),
             sender.toUpperCase(),
-            `event's to (${sendEvent.to}) matches request (${sender})`
+            `event's to (${sendEvent.to}) matches request (${sender})`,
         );
         assert.equal(
             BigInt(sendEvent.value),
             value,
-            `event's value (${sendEvent.value}) matches request (${value})`
+            `event's value (${sendEvent.value}) matches request (${value})`,
         );
 
         await wallet.glue.sendTransaction({
@@ -119,18 +119,18 @@ describe("sendTransaction", () => {
 
         assert.ok(
             viem.isAddressEqual(viem.getAddress(sendEvent.from), sender),
-            `event's from (${sendEvent.from}) matches request (${sender})`
+            `event's from (${sendEvent.from}) matches request (${sender})`,
         );
 
         assert.ok(
             viem.isAddressEqual(viem.getAddress(sendEvent.to), contractAddress),
-            `event's to (${sendEvent.to}) matches request (${contractAddress})`
+            `event's to (${sendEvent.to}) matches request (${contractAddress})`,
         );
 
         assert.equal(
             sendEvent.data.toLowerCase(),
             "0xa2bed3f200000000000000000000000000000000000000000000000000000000000004d2",
-            `event's data matches request`
+            `event's data matches request`,
         );
 
         await wallet.glue.sendTransaction({

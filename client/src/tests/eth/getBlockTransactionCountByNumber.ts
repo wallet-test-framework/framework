@@ -56,7 +56,7 @@ describe("getBlockTransactionCountByNumber", () => {
             blockNumber + 2n,
             `transaction block (${
                 mined?.blockNumber ?? "<none>"
-            }) matches mined block (${blockNumber + 2n})`
+            }) matches mined block (${blockNumber + 2n})`,
         );
 
         const count0 = await wallet.public.getBlockTransactionCount({
@@ -76,7 +76,7 @@ describe("getBlockTransactionCountByNumber", () => {
             wallet.public.getBlockTransactionCount({
                 blockNumber:
                     0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffn,
-            })
+            }),
         );
     });
 });

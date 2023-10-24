@@ -37,7 +37,7 @@ describe("getBlockByNumber", () => {
         await assert.rejects(
             wallet.public.getBlock({
                 blockNumber,
-            })
+            }),
         );
     });
 });

@@ -49,9 +49,8 @@ describe("createAccessList", () => {
             ],
         };
 
-        const fromBlockchain: unknown = await blockchain.provider.request(
-            request
-        );
+        const fromBlockchain: unknown =
+            await blockchain.provider.request(request);
         const fromWallet: unknown = await wallet.provider.request(request);
 
         assert.deepEqual(fromBlockchain, fromWallet);

@@ -46,7 +46,7 @@ describe("newFilter", () => {
         });
         if (receipt0.status !== "success" || receipt1.status !== "success") {
             throw new Error(
-                `not deployed: ${receipt0.status} and ${receipt1.status}`
+                `not deployed: ${receipt0.status} and ${receipt1.status}`,
             );
         }
 
@@ -81,7 +81,7 @@ describe("newFilter", () => {
                         unwatch();
                         resolve(a);
                     },
-                }
+                },
             );
         });
         const call = await contract0.write.logSomething([1234n]);
@@ -101,7 +101,7 @@ describe("newFilter", () => {
                         unwatch();
                         resolve(a);
                     },
-                }
+                },
             );
         });
         const call = await contract0.write.logSomething([1234n]);
@@ -120,7 +120,7 @@ describe("newFilter", () => {
                         unwatch();
                         resolve(a);
                     },
-                }
+                },
             );
         });
         const call = await contract0.write.logSomethingElse([1234n]);
@@ -135,7 +135,7 @@ describe("newFilter", () => {
             wallet.provider.request({
                 method: "eth_newFilter",
                 params: [{ fromBlock: "concrete", toBlock: "wood" }],
-            })
+            }),
         );
     });
 });

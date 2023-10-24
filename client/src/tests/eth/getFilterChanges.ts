@@ -60,7 +60,7 @@ describe("getFilterChanges", () => {
             wallet.provider.request({
                 method: "eth_getFilterChanges",
                 params: ["0xdeadc0de"],
-            })
+            }),
         );
     });
 
@@ -99,7 +99,7 @@ describe("getFilterChanges", () => {
             assert.equal(logs[0].blockNumber, blockNumber + 1n);
             assert.equal(
                 logs[0].topics[1],
-                "0x00000000000000000000000000000000000000000000000000000000000004d2"
+                "0x00000000000000000000000000000000000000000000000000000000000004d2",
             );
             assert.equal(logs[0].transactionHash, call);
             assert.equal(logs[0].transactionIndex, receipt.transactionIndex);

@@ -23,6 +23,10 @@ export class ClientState {
         let parsed: unknown;
 
         try {
+            // It's totally fine if `toString` returns `"[object Object]"`,
+            // because that'll fail to parse as valid JSON.
+
+            // eslint-disable-next-line @typescript-eslint/no-base-to-string
             parsed = JSON.parse(data.toString());
         } catch (err) {
             console.debug("Invalid WebSocket message", err);
@@ -55,7 +59,7 @@ export class ClientState {
 
     private disposeInFlight(
         value: http.ServerResponse | false,
-        key: number
+        key: number,
     ): void {
         if (!value) {
             return;
@@ -76,7 +80,7 @@ export class ClientState {
                         message: "wtf: too many in-flight requests",
                     },
                     id: null,
-                })
+                }),
             );
     }
 
@@ -100,7 +104,7 @@ export class ClientState {
             JSON.stringify({
                 number: requestId,
                 body,
-            })
+            }),
         );
     }
 

@@ -42,7 +42,7 @@ describe("getTransactionReceipt", () => {
         await assert.rejects(
             wallet.public.getTransactionReceipt({
                 hash: "0x0000000000000000000000000000000000000000000000000000000000000000",
-            })
+            }),
         );
     });
 });

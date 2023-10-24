@@ -51,17 +51,17 @@ describe("signTransaction", () => {
             assert.equal(
                 signEvent.from.toUpperCase(),
                 sender.toUpperCase(),
-                `event's from (${signEvent.from}) matches request (${sender})`
+                `event's from (${signEvent.from}) matches request (${sender})`,
             );
             assert.equal(
                 signEvent.to.toUpperCase(),
                 sender.toUpperCase(),
-                `event's to (${signEvent.to}) matches request (${sender})`
+                `event's to (${signEvent.to}) matches request (${sender})`,
             );
             assert.equal(
                 BigInt(signEvent.value),
                 value,
-                `event's value (${signEvent.value}) matches request (${value})`
+                `event's value (${signEvent.value}) matches request (${value})`,
             );
 
             await wallet.glue.signTransaction({
@@ -84,7 +84,7 @@ describe("signTransaction", () => {
                             filter,
                         });
                     }
-                })()
+                })(),
             );
 
             const transaction = parseTransaction(response as `0x${string}`);
