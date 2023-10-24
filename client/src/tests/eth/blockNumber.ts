@@ -18,7 +18,7 @@ describe("blockNumber", () => {
         assert.equal(
             walletInitalBlockNumber,
             ganacheInitalBlockNumber,
-            "initalBlockNumber"
+            "initalBlockNumber",
         );
 
         await blockchain.test.mine({ blocks: 5000 });
@@ -31,7 +31,7 @@ describe("blockNumber", () => {
             ganacheFinalBlockNumber,
             expected,
             `blockchain's final block number (${ganacheFinalBlockNumber}) equals` +
-                ` wallet's initial block number plus number mined (${expected})`
+                ` wallet's initial block number plus number mined (${expected})`,
         );
 
         await retry(async () => {
@@ -41,7 +41,7 @@ describe("blockNumber", () => {
                 walletFinalBlockNumber,
                 ganacheFinalBlockNumber,
                 `wallet's final block number (${walletFinalBlockNumber}) equals` +
-                    ` blockchain's final block number (${ganacheFinalBlockNumber})`
+                    ` blockchain's final block number (${ganacheFinalBlockNumber})`,
             );
         });
     });

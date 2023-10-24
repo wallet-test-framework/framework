@@ -229,7 +229,7 @@ function main() {
                     if ("params" in msg.body) {
                         if (!(msg.body.params instanceof Array)) {
                             throw new TypeError(
-                                "'params' in body not an array"
+                                "'params' in body not an array",
                             );
                         }
 
@@ -255,9 +255,9 @@ function main() {
                         JSON.stringify({
                             number: msg.number,
                             result: { jsonrpc: "2.0", ...result },
-                        })
+                        }),
                     );
-                })
+                }),
             );
 
             const open = spawn(async () => {
@@ -307,7 +307,7 @@ function main() {
             });
 
             webSocket.addEventListener("open", open);
-        })
+        }),
     );
 }
 

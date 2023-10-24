@@ -46,7 +46,7 @@ type TemplateContext = { [key: string]: string | HTMLElement };
 
 abstract class Template extends HTMLElement {
     public static define(
-        templateName: string
+        templateName: string,
     ): (new (_: TemplateContext) => Template) & typeof Template {
         const clazz = class extends Template {
             constructor(values: TemplateContext) {
@@ -98,7 +98,7 @@ const SignTransactionTemplate = Template.define("wtf-sign-transaction");
 const SendTransactionTemplate = Template.define("wtf-send-transaction");
 const AddEthereumChainTemplate = Template.define("wtf-add-ethereum-chain");
 const SwitchEthereumChainTemplate = Template.define(
-    "wtf-switch-ethereum-chain"
+    "wtf-switch-ethereum-chain",
 );
 
 export class ManualGlue extends Glue {
@@ -159,7 +159,7 @@ export class ManualGlue extends Glue {
             "switchethereumchain",
             new SwitchEthereumChainEvent(domain, {
                 chainId,
-            })
+            }),
         );
     }
 
@@ -168,7 +168,7 @@ export class ManualGlue extends Glue {
         const chainId = data.get("chain-id");
         let chainName = data.get("chain-name");
         const blockExplorerUrls = ManualGlue.splitArray(
-            data.get("block-explorer-urls")
+            data.get("block-explorer-urls"),
         );
         const iconUrls = ManualGlue.splitArray(data.get("icon-urls"));
         const rpcUrls = ManualGlue.splitArray(data.get("rpc-urls"));
@@ -191,7 +191,7 @@ export class ManualGlue extends Glue {
                 blockExplorerUrls,
                 iconUrls,
                 rpcUrls,
-            })
+            }),
         );
     }
 
@@ -209,7 +209,7 @@ export class ManualGlue extends Glue {
         const accounts = accountsText.split(/[^a-fA-Fx0-9]/);
         this.emit(
             "requestaccounts",
-            new RequestAccountsEvent(domain, { accounts })
+            new RequestAccountsEvent(domain, { accounts }),
         );
     }
 
@@ -255,7 +255,7 @@ export class ManualGlue extends Glue {
 
         this.emit(
             "sendtransaction",
-            new SendTransactionEvent(domain, { from, to, value, data: data_ })
+            new SendTransactionEvent(domain, { from, to, value, data: data_ }),
         );
     }
 
@@ -287,7 +287,7 @@ export class ManualGlue extends Glue {
 
         this.emit(
             "signtransaction",
-            new SignTransactionEvent(domain, { from, to, value, data: data_ })
+            new SignTransactionEvent(domain, { from, to, value, data: data_ }),
         );
     }
 
@@ -370,7 +370,7 @@ export class ManualGlue extends Glue {
     }
 
     override async switchEthereumChain(
-        action: SwitchEthereumChain
+        action: SwitchEthereumChain,
     ): Promise<void> {
         if (action.action !== "approve") {
             throw "not implemented";
@@ -379,7 +379,7 @@ export class ManualGlue extends Glue {
         await this.instruct(
             new SwitchEthereumChainTemplate({
                 id: action.id,
-            })
+            }),
         );
     }
 
@@ -391,7 +391,7 @@ export class ManualGlue extends Glue {
         await this.instruct(
             new AddEthereumChainTemplate({
                 id: action.id,
-            })
+            }),
         );
     }
 
@@ -411,7 +411,7 @@ export class ManualGlue extends Glue {
             new RequestAccountsTemplate({
                 id: action.id,
                 accounts: list,
-            })
+            }),
         );
     }
 
@@ -423,7 +423,7 @@ export class ManualGlue extends Glue {
         await this.instruct(
             new SignMessageTemplate({
                 id: action.id,
-            })
+            }),
         );
     }
 
@@ -435,7 +435,7 @@ export class ManualGlue extends Glue {
         await this.instruct(
             new SendTransactionTemplate({
                 id: action.id,
-            })
+            }),
         );
     }
 
@@ -447,7 +447,7 @@ export class ManualGlue extends Glue {
         await this.instruct(
             new SignTransactionTemplate({
                 id: action.id,
-            })
+            }),
         );
     }
 
@@ -462,7 +462,7 @@ export class ManualGlue extends Glue {
                 Number.parseInt(ev.chainId),
                 Number.parseInt(action.chainId),
                 `expected to switch to chain ${action.chainId},` +
-                    ` but got ${ev.chainId}`
+                    ` but got ${ev.chainId}`,
             );
 
             switchActionPromise = this.switchEthereumChain({
@@ -512,21 +512,21 @@ export class ManualGlue extends Glue {
             assert.strictEqual(
                 addEvent.rpcUrls.length,
                 1,
-                `expected one RPC URL, but got ${addEvent.rpcUrls.length}`
+                `expected one RPC URL, but got ${addEvent.rpcUrls.length}`,
             );
 
             assert.strictEqual(
                 addEvent.rpcUrls[0],
                 action.rpcUrl,
                 `expected an RPC URL of "${action.rpcUrl}",` +
-                    ` but got "${addEvent.rpcUrls[0]}"`
+                    ` but got "${addEvent.rpcUrls[0]}"`,
             );
 
             assert.strictEqual(
                 Number.parseInt(addEvent.chainId),
                 Number.parseInt(action.chainId),
                 `expected a chain id of ${action.chainId},` +
-                    ` but got ${addEvent.chainId}`
+                    ` but got ${addEvent.chainId}`,
             );
 
             await this.addEthereumChain({
@@ -586,7 +586,7 @@ export class ManualGlue extends Glue {
             new ActivateChainTemplate({
                 "chain-id": action.chainId,
                 "rpc-url": action.rpcUrl,
-            })
+            }),
         );
     }
 

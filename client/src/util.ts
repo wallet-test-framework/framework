@@ -77,7 +77,7 @@ export function notEver(promise: Promise<unknown>): Promise<void> {
 }
 
 export function spawn<R, T extends Array<U>, U>(
-    f: (...args: T) => Promise<R>
+    f: (...args: T) => Promise<R>,
 ): (...args: Parameters<typeof f>) => void {
     // Create an error here so we can display a backtrace at runtime if
     // something gets thrown (at least in browsers that support backtraces.)
@@ -87,7 +87,7 @@ export function spawn<R, T extends Array<U>, U>(
         f(...args).catch((error) => {
             console.error(error, "\n", origin);
             alert(
-                "an unhandled exception has occurred; please check the console"
+                "an unhandled exception has occurred; please check the console",
             );
         });
     };

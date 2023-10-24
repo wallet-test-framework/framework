@@ -57,7 +57,7 @@ describe("getBlockTransactionCountByHash", () => {
             blockHash0,
             `first transaction block ${mined0?.blockNumber ?? "<none>"} (${
                 mined0?.blockHash ?? "<none>"
-            }) matches mined block ${blockNumber + 1n} (${blockHash0})`
+            }) matches mined block ${blockNumber + 1n} (${blockHash0})`,
         );
 
         // Create a block with two transactions
@@ -88,7 +88,7 @@ describe("getBlockTransactionCountByHash", () => {
             blockHash1,
             `third transaction block ${mined1?.blockNumber ?? "<none>"} (${
                 mined1?.blockHash ?? "<none>"
-            })` + ` matches mined block ${blockNumber + 2n} (${blockHash1})`
+            })` + ` matches mined block ${blockNumber + 2n} (${blockHash1})`,
         );
 
         const count0 = await wallet.public.getBlockTransactionCount({
@@ -109,7 +109,7 @@ describe("getBlockTransactionCountByHash", () => {
             wallet.public.getBlockTransactionCount({
                 blockHash:
                     "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-            })
+            }),
         );
     });
 });

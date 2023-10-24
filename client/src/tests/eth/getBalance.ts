@@ -60,7 +60,7 @@ describe("getBalance", () => {
         assert.equal(
             walletInitalBalance.toString(),
             ganacheInitalBalance.toString(),
-            "initalBalance"
+            "initalBalance",
         );
 
         const value = 1n;
@@ -83,7 +83,7 @@ describe("getBalance", () => {
         assert.equal(
             walletFinalBalance.toString(),
             ganacheFinalBalance.toString(),
-            "finalBalance"
+            "finalBalance",
         );
 
         const expected = value + walletInitalBalance;
@@ -107,7 +107,7 @@ describe("getBalance", () => {
         assert.equal(
             walletInitalBalance.toString(),
             ganacheInitalBalance.toString(),
-            "initalBalance"
+            "initalBalance",
         );
 
         const value = 1n;
@@ -127,7 +127,7 @@ describe("getBalance", () => {
         assert.equal(
             walletFinalBalance.toString(),
             ganacheFinalBalance.toString(),
-            "finalBalance"
+            "finalBalance",
         );
 
         const expected = value + walletInitalBalance;

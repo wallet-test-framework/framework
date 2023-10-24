@@ -34,7 +34,7 @@ function rpcRoute(req: express.Request, res: express.Response): void {
             }
 
             connections.rpcRequest(key, body, res);
-        }
+        },
     );
 }
 
@@ -54,7 +54,7 @@ wss.on("connection", (ws, req) => {
         "Incoming WebSocket",
         req.url,
         req.socket.remoteAddress,
-        req.socket.remotePort
+        req.socket.remotePort,
     );
 
     const url = req.url;

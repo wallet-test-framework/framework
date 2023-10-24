@@ -22,7 +22,7 @@ export class Connections {
     public rpcRequest(
         key: string,
         request: Buffer,
-        response: ServerResponse
+        response: ServerResponse,
     ): void {
         const maybeClient = this.connections.get(key);
 
@@ -45,7 +45,7 @@ export class Connections {
                             message: "wtf: no WebSocket connection",
                         },
                         id: null,
-                    })
+                    }),
                 );
         }
     }

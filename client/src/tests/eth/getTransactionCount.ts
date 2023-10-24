@@ -67,7 +67,7 @@ describe("getTransactionCount", () => {
         assert.equal(
             walletInitalNonce,
             ganacheInitalNonce,
-            "wallet's nonce matches ganache's before sending transaction"
+            "wallet's nonce matches ganache's before sending transaction",
         );
 
         const response = await blockchain.wallet.sendTransaction({
@@ -89,7 +89,7 @@ describe("getTransactionCount", () => {
         assert.equal(
             walletFinalNonce,
             ganacheFinalNonce,
-            "wallet's nonce matches ganache's after sending transaction"
+            "wallet's nonce matches ganache's after sending transaction",
         );
 
         const expected = 1 + walletInitalNonce;
@@ -116,7 +116,7 @@ describe("getTransactionCount", () => {
         assert.equal(
             walletInitalNonce,
             ganacheInitalNonce,
-            "wallet's nonce matches ganache's before sending transaction"
+            "wallet's nonce matches ganache's before sending transaction",
         );
 
         const response = await contract.write.deploy();
@@ -135,7 +135,7 @@ describe("getTransactionCount", () => {
         assert.equal(
             walletFinalNonce,
             ganacheFinalNonce,
-            "wallet's nonce matches ganache's after sending transaction"
+            "wallet's nonce matches ganache's after sending transaction",
         );
 
         const expected = 1 + walletInitalNonce;

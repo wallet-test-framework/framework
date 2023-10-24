@@ -102,7 +102,7 @@ describe("getProof", () => {
                     ["0x00"],
                     blockNumber.toString(16),
                 ],
-            })
+            }),
         );
 
         const fromWallet = asProof(
@@ -113,13 +113,13 @@ describe("getProof", () => {
                     ["0x00"],
                     blockNumber.toString(16),
                 ],
-            })
+            }),
         );
 
         assert.deepEqual(fromWallet, fromBlockchain);
         assert.equal(
             fromWallet.codeHash,
-            "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"
+            "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
         );
         assert.equal(fromWallet.storageProof.length, 1);
     });
@@ -145,20 +145,20 @@ describe("getProof", () => {
             await blockchain.provider.request({
                 method: "eth_getProof",
                 params: [contractAddress, ["0x00"], nextBlockNumberHex],
-            })
+            }),
         );
 
         const fromWallet = asProof(
             await wallet.provider.request({
                 method: "eth_getProof",
                 params: [contractAddress, ["0x00"], nextBlockNumberHex],
-            })
+            }),
         );
 
         assert.deepEqual(fromWallet, fromBlockchain);
         assert.equal(
             fromWallet.codeHash,
-            "0x64c4775c8291ba05add5689df55b0662da1e1608c70cf6ac1ab76be406ce9a0d"
+            "0x64c4775c8291ba05add5689df55b0662da1e1608c70cf6ac1ab76be406ce9a0d",
         );
         assert.equal(fromWallet.storageProof.length, 1);
         assert.equal(fromWallet.storageProof[0].value, "0x89");

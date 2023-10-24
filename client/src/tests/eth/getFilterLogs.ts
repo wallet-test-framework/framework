@@ -45,7 +45,7 @@ describe("getFilterLogs", () => {
         });
         if (receipt0.status !== "success" || receipt1.status !== "success") {
             throw new Error(
-                `not deployed: ${receipt0.status} and ${receipt1.status}`
+                `not deployed: ${receipt0.status} and ${receipt1.status}`,
             );
         }
 
@@ -137,7 +137,7 @@ describe("getFilterLogs", () => {
             assert.equal(logs[0].blockNumber, blockNumber + 1n);
             assert.equal(
                 logs[0].topics[1],
-                "0x00000000000000000000000000000000000000000000000000000000000004d2"
+                "0x00000000000000000000000000000000000000000000000000000000000004d2",
             );
             assert.equal(logs[0].transactionHash, call);
             assert.equal(logs[0].transactionIndex, receipt.transactionIndex);
@@ -159,7 +159,7 @@ describe("getFilterLogs", () => {
                 wallet.provider.request({
                     method: "eth_getFilterLogs",
                     params: [filter],
-                })
+                }),
             );
         } finally {
             await wallet.provider.request({
@@ -182,7 +182,7 @@ describe("getFilterLogs", () => {
                 wallet.provider.request({
                     method: "eth_getFilterLogs",
                     params: [filter],
-                })
+                }),
             );
         } finally {
             await wallet.provider.request({
@@ -205,7 +205,7 @@ describe("getFilterLogs", () => {
             wallet.provider.request({
                 method: "eth_getFilterLogs",
                 params: ["0xdeadc0de"],
-            })
+            }),
         );
     });
 });

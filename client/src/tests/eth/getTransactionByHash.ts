@@ -27,7 +27,7 @@ describe("getTransctionByHash", () => {
 
         assert.equal(
             walletTransactionByHash.from,
-            blockchain.wallet.account.address
+            blockchain.wallet.account.address,
         );
 
         assert.equal(walletTransactionByHash.to, dest);
@@ -39,7 +39,7 @@ describe("getTransctionByHash", () => {
         await assert.rejects(
             wallet.public.getTransaction({
                 hash: "0x0000000000000000000000000000000000000000000000000000000000000000",
-            })
+            }),
         );
     });
 });

@@ -28,7 +28,7 @@ describe("sign", () => {
 
         assert.ok(
             valid,
-            `valid signature from ${wallet.wallet.account.address}`
+            `valid signature from ${wallet.wallet.account.address}`,
         );
     });
 });
