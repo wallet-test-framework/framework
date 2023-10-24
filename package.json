@@ -1,6 +1,6 @@
 {
     "name": "@wallet-test-framework/framework",
-    "version": "0.9.0",
+    "version": "0.10.0-dev",
     "description": "a suite of tests for Ethereum wallets",
     "license": "MIT",
     "type": "module",
