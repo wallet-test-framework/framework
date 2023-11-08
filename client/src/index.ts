@@ -1,6 +1,6 @@
 import { ManualGlue, WebSocketGlue } from "./glue";
 import * as tests from "./tests";
-import { spawn } from "./util";
+import { retry, spawn } from "./util";
 import { Glue } from "@wallet-test-framework/glue";
 import "mocha/mocha.css";
 import * as viem from "viem";
@@ -283,6 +283,31 @@ function main() {
                 if (requestAccountsPromise instanceof Promise) {
                     await requestAccountsPromise;
                 }
+
+                await retry({
+                    totalMillis: 10 * 60 * 1000,
+                    operation: async () => {
+                        const walletChain =
+                            await unboundWallet.public.getChainId();
+                        if (chainId === walletChain) {
+                            return;
+                        }
+
+                        console.log(
+                            "switching from chain id",
+                            walletChain,
+                            "to",
+                            chainId
+                        );
+
+                        await unboundWallet.wallet.switchChain({ id: chainId });
+                        // TODO: This likely will need a glue event.
+
+                        throw new Error(
+                            `want chain ${chainId} but got chain ${walletChain}`
+                        );
+                    },
+                });
 
                 const wallet: WalletChain = {
                     provider: window.ethereum,
