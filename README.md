@@ -2,6 +2,19 @@
 
 [blog](https://wtf.allwallet.dev/)
 
+## Friends of Wallet Test Framework
+
+We would like to extend our heartfelt thanks to the sponsors making this project possible:
+
+<a title="Brave" href="https://brave.com/"><img
+        height="64"
+        alt="Brave Logo"
+        src="https://wtf.allwallet.dev/sponsors/brave.svg"></a>
+<a title="Ethereum Foundation" href="https://esp.ethereum.foundation/"><img
+        height="64"
+        alt="Ethereum Logo"
+        src="https://wtf.allwallet.dev/sponsors/ef.svg"></a>
+
 ## Usage
 
 Optionally, you can [configure npm to install without superuser permissions][unglobal].
