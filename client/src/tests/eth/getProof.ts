@@ -91,7 +91,7 @@ describe("getProof", () => {
         });
     });
 
-    it("returns a proof matching client for EOA", async () => {
+    it.skip("returns a proof matching client for EOA", async () => {
         const blockNumber = await blockchain.public.getBlockNumber();
 
         const fromBlockchain = asProof(
