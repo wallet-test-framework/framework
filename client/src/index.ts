@@ -199,8 +199,6 @@ function main() {
                     const msg: unknown = JSON.parse(event.data);
                     console.log("received:", msg);
 
-                    const result: { [key: string]: unknown } = {};
-
                     if (!msg || typeof msg !== "object") {
                         throw new TypeError("received message not object");
                     }
@@ -213,48 +211,68 @@ function main() {
                         throw new TypeError("'body' not an object");
                     }
 
-                    if ("id" in msg.body) {
-                        result.id = msg.body.id;
-                    }
-
-                    if (!("method" in msg.body)) {
-                        throw new TypeError("'method' not in message body");
-                    }
-
-                    if (typeof msg.body.method !== "string") {
-                        throw new TypeError("'method' in body not a string");
-                    }
-
-                    let params: unknown[];
-                    if ("params" in msg.body) {
-                        if (!(msg.body.params instanceof Array)) {
-                            throw new TypeError(
-                                "'params' in body not an array",
-                            );
-                        }
-
-                        params = msg.body.params;
+                    let requests: Array<unknown>;
+                    let batch;
+                    if (msg.body instanceof Array) {
+                        requests = msg.body;
+                        batch = true;
                     } else {
-                        params = [];
+                        requests = [msg.body];
+                        batch = false;
                     }
 
                     if (!("number" in msg)) {
                         throw new TypeError("'number' not in message body");
                     }
 
-                    try {
-                        result.result = await blockchain.provider.request({
-                            method: msg.body.method,
-                            params,
-                        });
-                    } catch (error: unknown) {
-                        result.error = error;
+                    const responses = [];
+                    for (const request of requests) {
+                        const response: { [key: string]: unknown } = {};
+
+                        if (!request || typeof request !== "object") {
+                            throw new TypeError("received request not object");
+                        }
+
+                        if ("id" in request) {
+                            response.id = request.id;
+                        }
+
+                        if (!("method" in request)) {
+                            throw new TypeError("'method' not in request");
+                        }
+
+                        if (typeof request.method !== "string") {
+                            throw new TypeError("request 'method' not a string");
+                        }
+
+                        let params: unknown[] | object;
+                        if ("params" in request) {
+                            if (!request.params || typeof request.params !== "object") {
+                                throw new Error("request 'params' not an array or object");
+                            }
+                            params = request.params;
+                        } else {
+                            params = [];
+                        }
+
+                        try {
+                            response.result = await blockchain.provider.request({
+                                method: request.method,
+                                params,
+                            });
+                        } catch (error: unknown) {
+                            response.error = error;
+                        }
+
+                        responses.push({ jsonrpc: "2.0", ...response });
                     }
+
+                    const result = batch ? responses : responses[0];
 
                     webSocket?.send(
                         JSON.stringify({
                             number: msg.number,
-                            result: { jsonrpc: "2.0", ...result },
+                            result,
                         }),
                     );
                 }),
