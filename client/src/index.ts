@@ -242,13 +242,20 @@ function main() {
                         }
 
                         if (typeof request.method !== "string") {
-                            throw new TypeError("request 'method' not a string");
+                            throw new TypeError(
+                                "request 'method' not a string",
+                            );
                         }
 
                         let params: unknown[] | object;
                         if ("params" in request) {
-                            if (!request.params || typeof request.params !== "object") {
-                                throw new Error("request 'params' not an array or object");
+                            if (
+                                !request.params ||
+                                typeof request.params !== "object"
+                            ) {
+                                throw new Error(
+                                    "request 'params' not an array or object",
+                                );
                             }
                             params = request.params;
                         } else {
@@ -256,10 +263,12 @@ function main() {
                         }
 
                         try {
-                            response.result = await blockchain.provider.request({
-                                method: request.method,
-                                params,
-                            });
+                            response.result = await blockchain.provider.request(
+                                {
+                                    method: request.method,
+                                    params,
+                                },
+                            );
                         } catch (error: unknown) {
                             response.error = error;
                         }
@@ -315,14 +324,14 @@ function main() {
                             "switching from chain id",
                             walletChain,
                             "to",
-                            chainId
+                            chainId,
                         );
 
                         await unboundWallet.wallet.switchChain({ id: chainId });
                         // TODO: This likely will need a glue event.
 
                         throw new Error(
-                            `want chain ${chainId} but got chain ${walletChain}`
+                            `want chain ${chainId} but got chain ${walletChain}`,
                         );
                     },
                 });
