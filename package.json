@@ -78,7 +78,7 @@
     "dependencies": {
         "cors": "^2.8.5",
         "express": "^4.18.3",
-        "lru-cache": "^10.0.1",
+        "lru-cache": "^10.2.0",
         "raw-body": "^2.5.2",
         "serve-static": "^1.15.0",
         "ws": "^8.16.0"
