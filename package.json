@@ -73,7 +73,7 @@
         "rpc-websockets": "^7.6.1",
         "solc": "0.8.24",
         "typescript": "^5.4.2",
-        "viem": "^1.16.6"
+        "viem": "^2.7.20"
     },
     "dependencies": {
         "cors": "^2.8.5",

@@ -14,8 +14,10 @@ describe("getBalance", () => {
     let contractAddress: `0x${string}`;
     let contract: viem.GetContractReturnType<
         typeof RECEIVE_ABI,
-        typeof blockchain.public,
-        typeof blockchain.wallet
+        {
+            public: typeof blockchain.public;
+            wallet: typeof blockchain.wallet;
+        }
     >;
 
     before(async () => {
@@ -36,8 +38,10 @@ describe("getBalance", () => {
         }
         contractAddress = address;
         contract = viem.getContract({
-            publicClient: blockchain.public,
-            walletClient: blockchain.wallet,
+            client: {
+                public: blockchain.public,
+                wallet: blockchain.wallet,
+            },
             address,
             abi: RECEIVE_ABI,
         });
