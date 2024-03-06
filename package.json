@@ -54,11 +54,11 @@
         "@jgoz/esbuild-plugin-typecheck": "^3.1.1",
         "@trivago/prettier-plugin-sort-imports": "^4.3.0",
         "@tsconfig/recommended": "^1.0.3",
-        "@types/cors": "^2.8.15",
-        "@types/express": "^4.17.20",
-        "@types/mocha": "^10.0.3",
-        "@types/serve-static": "^1.15.4",
-        "@types/ws": "^8.5.8",
+        "@types/cors": "^2.8.17",
+        "@types/express": "^4.17.21",
+        "@types/mocha": "^10.0.6",
+        "@types/serve-static": "^1.15.5",
+        "@types/ws": "^8.5.10",
         "@typescript-eslint/eslint-plugin": "7.1.1",
         "@typescript-eslint/parser": "^7.1.1",
         "@wallet-test-framework/glue": "^0.7.0",
@@ -66,21 +66,21 @@
         "esbuild": "0.20.1",
         "eslint": "8.57.0",
         "eslint-config-prettier": "^9.1.0",
-        "ganache": "7.9.0",
-        "mocha": "^10.2.0",
+        "ganache": "7.9.2",
+        "mocha": "^10.3.0",
         "prettier": "3.2.5",
         "process": "^0.11.10",
-        "rpc-websockets": "^7.6.1",
-        "solc": "0.8.19",
+        "rpc-websockets": "^7.9.0",
+        "solc": "0.8.24",
         "typescript": "^5.4.2",
-        "viem": "^1.16.6"
+        "viem": "^2.7.20"
     },
     "dependencies": {
         "cors": "^2.8.5",
-        "express": "^4.18.2",
-        "lru-cache": "^10.0.1",
+        "express": "^4.18.3",
+        "lru-cache": "^10.2.0",
         "raw-body": "^2.5.2",
         "serve-static": "^1.15.0",
-        "ws": "^8.14.2"
+        "ws": "^8.16.0"
     }
 }

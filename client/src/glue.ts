@@ -480,7 +480,6 @@ export class ManualGlue extends Glue {
                     chain: {
                         id: Number.parseInt(action.chainId),
                         name: `Test Chain ${action.chainId}`,
-                        network: "test-chain",
                         nativeCurrency: {
                             name: "teth",
                             symbol: "teth",

@@ -15,8 +15,10 @@ describe("sendTransaction", () => {
     let contractAddress: `0x${string}`;
     let contract: viem.GetContractReturnType<
         typeof EMIT_ABI,
-        typeof wallet.public,
-        typeof wallet.wallet
+        {
+            public: typeof wallet.public;
+            wallet: typeof wallet.wallet;
+        }
     >;
 
     before(async () => {
@@ -37,8 +39,10 @@ describe("sendTransaction", () => {
         }
         contractAddress = address;
         contract = viem.getContract({
-            publicClient: wallet.public,
-            walletClient: wallet.wallet,
+            client: {
+                public: wallet.public,
+                wallet: wallet.wallet,
+            },
             address,
             abi: EMIT_ABI,
         });

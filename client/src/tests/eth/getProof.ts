@@ -61,8 +61,10 @@ describe("getProof", () => {
     let contractAddress: `0x${string}`;
     let contract: viem.GetContractReturnType<
         typeof STORE_ABI,
-        typeof blockchain.public,
-        typeof blockchain.wallet
+        {
+            public: typeof blockchain.public;
+            wallet: typeof blockchain.wallet;
+        }
     >;
 
     before(async () => {
@@ -84,8 +86,10 @@ describe("getProof", () => {
         }
         contractAddress = address;
         contract = viem.getContract({
-            publicClient: blockchain.public,
-            walletClient: blockchain.wallet,
+            client: {
+                public: blockchain.public,
+                wallet: blockchain.wallet,
+            },
             address,
             abi: STORE_ABI,
         });

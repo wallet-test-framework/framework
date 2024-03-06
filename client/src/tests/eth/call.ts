@@ -13,8 +13,7 @@ if (!blockchain || !wallet) {
 describe("call", () => {
     let contract0: viem.GetContractReturnType<
         typeof CALL_ABI,
-        typeof wallet.public,
-        typeof wallet.wallet
+        { public: typeof wallet.public; wallet: typeof wallet.wallet }
     >;
 
     before(async () => {
@@ -41,8 +40,7 @@ describe("call", () => {
         }
 
         contract0 = viem.getContract({
-            publicClient: wallet.public,
-            walletClient: wallet.wallet,
+            client: { public: wallet.public, wallet: wallet.wallet },
             address: address0,
             abi: CALL_ABI,
         });
