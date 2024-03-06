@@ -54,7 +54,7 @@
         "@jgoz/esbuild-plugin-typecheck": "^3.1.1",
         "@trivago/prettier-plugin-sort-imports": "^4.3.0",
         "@tsconfig/recommended": "^1.0.3",
-        "@types/cors": "^2.8.15",
+        "@types/cors": "^2.8.17",
         "@types/express": "^4.17.20",
         "@types/mocha": "^10.0.3",
         "@types/serve-static": "^1.15.4",
