@@ -1,20 +1,33 @@
 import { TestChain, WalletChain } from "./index";
-import { HtmlTap } from "./reporter";
+import { HtmlXUnit } from "./reporter";
+import { Report } from "@wallet-test-framework/glue";
 import mocha from "mocha/mocha.js";
 
 export let wallet: WalletChain | null;
 export let blockchain: TestChain | null;
 
-export async function run(myBlockchain: TestChain, myWallet: WalletChain) {
+export async function run(
+    myBlockchain: TestChain,
+    myWallet: WalletChain,
+): Promise<Report> {
     wallet = myWallet;
     blockchain = myBlockchain;
+
+    let completedReport: string | undefined;
+
+    class MyHtmlXUnit extends HtmlXUnit {
+        protected override report(report: string): void {
+            completedReport = report;
+        }
+    }
 
     mocha.setup({
         ui: "bdd",
         timeout: 10 * 60 * 1000,
         slow: 60100,
-        reporter: HtmlTap,
+        reporter: MyHtmlXUnit,
     });
+
     await import("./tests/eth/accounts");
     await import("./tests/eth/blockNumber");
     await import("./tests/eth/call");
@@ -49,5 +62,22 @@ export async function run(myBlockchain: TestChain, myWallet: WalletChain) {
     await import("./tests/eth/signTransaction");
     await import("./tests/eth/uninstallFilter");
 
-    mocha.run();
+    const result = new Promise<Report>((res, rej) => {
+        try {
+            mocha.run((_failures: number) => {
+                if (!completedReport) {
+                    throw new Error("no report generated");
+                }
+
+                res({
+                    format: "xunit",
+                    value: completedReport,
+                });
+            });
+        } catch (e) {
+            rej(e);
+        }
+    });
+
+    return await result;
 }
