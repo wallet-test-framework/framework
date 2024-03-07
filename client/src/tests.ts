@@ -1,4 +1,5 @@
 import { TestChain, WalletChain } from "./index";
+import { HtmlTap } from "./reporter";
 import mocha from "mocha/mocha.js";
 
 export let wallet: WalletChain | null;
@@ -12,6 +13,7 @@ export async function run(myBlockchain: TestChain, myWallet: WalletChain) {
         ui: "bdd",
         timeout: 10 * 60 * 1000,
         slow: 60100,
+        reporter: HtmlTap,
     });
     await import("./tests/eth/accounts");
     await import("./tests/eth/blockNumber");
