@@ -212,7 +212,7 @@ function main() {
                     }
 
                     let requests: Array<unknown>;
-                    let batch;
+                    let batch: boolean;
                     if (msg.body instanceof Array) {
                         requests = msg.body;
                         batch = true;
@@ -355,7 +355,8 @@ function main() {
                     glue,
                 };
 
-                await tests.run(blockchain, wallet);
+                const report = await tests.run(blockchain, wallet);
+                await glue.report(report);
             });
 
             webSocket.addEventListener("open", open);

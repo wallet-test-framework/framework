@@ -61,7 +61,7 @@
         "@types/ws": "^8.5.10",
         "@typescript-eslint/eslint-plugin": "7.1.1",
         "@typescript-eslint/parser": "^7.1.1",
-        "@wallet-test-framework/glue": "^0.7.0",
+        "@wallet-test-framework/glue": "^0.8.0",
         "assert": "^2.1.0",
         "esbuild": "0.20.1",
         "eslint": "8.57.0",

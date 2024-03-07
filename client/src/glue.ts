@@ -6,6 +6,7 @@ import {
     AddEthereumChainEvent,
     EventMap,
     Glue,
+    Report,
     RequestAccounts,
     RequestAccountsEvent,
     SendTransaction,
@@ -105,6 +106,8 @@ export class ManualGlue extends Glue {
     private readonly rootElement: HTMLElement;
     private readonly eventsElement: HTMLElement;
     private readonly instructionsElement: HTMLElement;
+    private readonly reportLinkElement: HTMLAnchorElement;
+    private readonly reportElement: HTMLDialogElement;
 
     private readonly wallet: AnyChain;
 
@@ -116,6 +119,8 @@ export class ManualGlue extends Glue {
 
         const events = element.getElementsByClassName("events")[0];
         const instructions = element.getElementsByClassName("instructions")[0];
+        const reportLink = element.getElementsByClassName("report-link")[0];
+        const reportDialog = element.getElementsByClassName("report")[0];
 
         if (!(events instanceof HTMLElement)) {
             throw "missing .events element";
@@ -125,8 +130,18 @@ export class ManualGlue extends Glue {
             throw "missing .instructions element";
         }
 
+        if (!(reportLink instanceof HTMLAnchorElement)) {
+            throw "missing/incorrect .report-link element";
+        }
+
+        if (!(reportDialog instanceof HTMLDialogElement)) {
+            throw "missing/incorrect .report element";
+        }
+
         this.eventsElement = events;
         this.instructionsElement = instructions;
+        this.reportElement = reportDialog;
+        this.reportLinkElement = reportLink;
 
         element.classList.add("glue-active");
 
@@ -618,6 +633,23 @@ export class ManualGlue extends Glue {
             this.instructionsElement.replaceChildren(instruct);
         });
     }
+
+    override report(action: Report): Promise<void> {
+        if (action.format !== "xunit") {
+            throw new Error(`unknown report format ${action.format}`);
+        }
+
+        if (typeof action.value !== "string") {
+            throw new Error(`unknown report value ${typeof action.value}`);
+        }
+
+        const dataUri = "data:application/xml;base64," + btoa(action.value);
+        this.reportLinkElement.href = dataUri;
+
+        this.reportElement.showModal();
+
+        return Promise.resolve();
+    }
 }
 
 export class WebSocketGlue extends Glue {
@@ -689,5 +721,9 @@ export class WebSocketGlue extends Glue {
 
     async signTransaction(action: SignTransaction): Promise<void> {
         await this.client.call("signTransaction", [action]);
+    }
+
+    async report(action: Report): Promise<void> {
+        await this.client.call("report", [action]);
     }
 }

@@ -2,179 +2,162 @@
 // Copyright © 2024 Binary Cake Ltd. & Contributors
 //
 import mocha from "mocha/mocha.js";
-import { format as sprintf } from "util";
 
 const EVENT_TEST_PASS = Mocha.Runner.constants.EVENT_TEST_PASS;
 const EVENT_TEST_PENDING = Mocha.Runner.constants.EVENT_TEST_PENDING;
 const EVENT_TEST_FAIL = Mocha.Runner.constants.EVENT_TEST_FAIL;
-const EVENT_TEST_END = Mocha.Runner.constants.EVENT_TEST_END;
 const EVENT_RUN_END = Mocha.Runner.constants.EVENT_RUN_END;
-const EVENT_RUN_BEGIN = Mocha.Runner.constants.EVENT_RUN_BEGIN;
+const STATE_FAILED = "failed";
+const escape = Mocha.utils.escape;
 
-export class HtmlTap extends Mocha.reporters.HTML {
-    private _producer: TapProducer;
+function showDiff(err: unknown): err is { actual: string; expected: string } {
+    if (!err || typeof err !== "object") {
+        return false;
+    }
 
-    constructor(
-        runner: Mocha.Runner,
-        options?: Mocha.MochaOptions | undefined,
-    ) {
+    if ("showDiff" in err && err.showDiff === false) {
+        return false;
+    }
+
+    if (!("actual" in err && "expected" in err)) {
+        return false;
+    }
+
+    return typeof err.actual === "string" && typeof err.expected === "string";
+}
+
+export abstract class HtmlXUnit extends Mocha.reporters.HTML {
+    private _report: string = "";
+
+    constructor(runner: Mocha.Runner, options: Mocha.MochaOptions) {
         super(runner, options);
 
         // TODO: Figure out what's wrong with my typescript bindings that makes
         //       importing mocha without using it necessary.
         void mocha.setup;
 
-        let n = 1;
+        const stats = this.stats;
+        const tests: Mocha.Test[] = [];
 
-        let tapVersion = "12";
-        if (options && options.reporterOptions) {
-            const reporterOptions: unknown = options.reporterOptions;
-            if (reporterOptions && typeof reporterOptions === "object") {
-                if (
-                    "tapVersion" in reporterOptions &&
-                    reporterOptions.tapVersion
-                ) {
-                    // eslint-disable-next-line @typescript-eslint/no-base-to-string
-                    tapVersion = reporterOptions.tapVersion.toString();
-                }
-            }
-        }
+        // the name of the test suite, as it will appear in the resulting XML file
+        const suiteName = "Wallet Test Framework";
 
-        this._producer = createProducer(Number.parseInt(tapVersion));
-
-        runner.once(EVENT_RUN_BEGIN, () => {
-            this._producer.writeVersion();
+        runner.on(EVENT_TEST_PENDING, (test: Mocha.Test) => {
+            tests.push(test);
         });
 
-        runner.on(EVENT_TEST_END, () => {
-            ++n;
+        runner.on(EVENT_TEST_PASS, (test: Mocha.Test) => {
+            tests.push(test);
         });
 
-        runner.on(EVENT_TEST_PENDING, (test) => {
-            this._producer.writePending(n, test);
-        });
-
-        runner.on(EVENT_TEST_PASS, (test) => {
-            this._producer.writePass(n, test);
-        });
-
-        runner.on(EVENT_TEST_FAIL, (test, err) => {
-            this._producer.writeFail(n, test, err);
+        runner.on(EVENT_TEST_FAIL, (test: Mocha.Test) => {
+            tests.push(test);
         });
 
         runner.once(EVENT_RUN_END, () => {
-            if (runner.stats) {
-                this._producer.writeEpilogue(runner.stats);
+            const skipped = (
+                stats.tests -
+                stats.failures -
+                stats.passes
+            ).toString();
+            const data = {
+                name: suiteName,
+                tests: stats.tests.toString(),
+                failures: "0",
+                errors: stats.failures.toString(),
+                skipped,
+                timestamp: new Date().toUTCString(),
+                time: "0",
+            };
+            if (typeof stats.duration !== "undefined") {
+                data.time = (stats.duration / 1000).toString();
             }
+            this.write(this.tag("testsuite", data, false));
+
+            tests.forEach((t) => {
+                this.test(t);
+            });
+
+            this.write("</testsuite>");
+            this.report(this._report);
+            this._report = "";
         });
     }
-}
 
-function title(test: Mocha.Test) {
-    return test.fullTitle().replace(/#/g, "");
-}
+    protected abstract report(report: string): void;
 
-function println(format: string, ...args: unknown[]) {
-    format += "\n";
-    console.log(sprintf(format, ...args));
-}
-
-function createProducer(tapVersion: number): TapProducer {
-    const producers: { [key: number]: TapProducer } = {
-        12: new Tap12Producer(),
-        13: new Tap13Producer(),
-    };
-    const producer = producers[tapVersion];
-
-    if (!producer) {
-        throw new Error(
-            "invalid or unsupported Tap version: " + JSON.stringify(tapVersion),
-        );
-    }
-
-    return producer;
-}
-
-abstract class TapProducer {
-    writeVersion(): void {}
-    writePlan(ntests: number): void {
-        println("%d..%d", 1, ntests);
-    }
-    writePass(n: number, test: Mocha.Test): void {
-        println("ok %d %s", n, title(test));
-    }
-    writePending(n: number, test: Mocha.Test): void {
-        println("ok %d %s # SKIP -", n, title(test));
-    }
-    writeFail(n: number, test: Mocha.Test, _err: unknown): void {
-        println("not ok %d %s", n, title(test));
-    }
-    writeEpilogue(stats: Mocha.Stats): void {
-        // :TBD: Why is this not counting pending tests?
-        println("# tests " + (stats.passes + stats.failures));
-        println("# pass " + stats.passes);
-        // :TBD: Why are we not showing pending results?
-        println("# fail " + stats.failures);
-        this.writePlan(stats.passes + stats.failures + stats.pending);
-    }
-}
-
-class Tap12Producer extends TapProducer {
-    writeFail(n: number, test: Mocha.Test, err: unknown): void {
-        super.writeFail(n, test, err);
-
-        if (!err || typeof err !== "object") {
-            return;
-        }
-
-        if ("message" in err && typeof err.message === "string") {
-            println(err.message.replace(/^/gm, "  "));
-        }
-        if ("stack" in err && typeof err.stack === "string") {
-            println(err.stack.replace(/^/gm, "  "));
+    done(failures: number, fn?: (failures: number) => void): void {
+        if (fn) {
+            fn(failures);
         }
     }
-}
 
-class Tap13Producer extends TapProducer {
-    writeVersion(): void {
-        println("Tap version 13");
+    private write(line: string) {
+        this._report += line + "\n";
     }
 
-    writeFail(n: number, test: Mocha.Test, err: unknown): void {
-        super.writeFail(n, test, err);
+    private test(test: Mocha.Test) {
+        const attrs = {
+            classname: test.parent?.fullTitle() || "",
+            name: test.title,
+            time: ((test?.duration || 0) / 1000).toString(),
+        };
 
-        if (!err || typeof err !== "object") {
-            return;
+        if (test.state === STATE_FAILED) {
+            const generateDiff = Mocha.reporters.Base.generateDiff;
+            const err = test.err || {};
+            const diff = showDiff(err)
+                ? "\n" + generateDiff(err.actual, err.expected)
+                : "";
+            const message = "message" in err ? err.message : "";
+            const stack = "stack" in err ? err.stack : "";
+            this.write(
+                this.tag(
+                    "testcase",
+                    attrs,
+                    false,
+                    this.tag(
+                        "failure",
+                        {},
+                        false,
+                        escape(message) + escape(diff) + "\n" + escape(stack),
+                    ),
+                ),
+            );
+        } else if (test.isPending()) {
+            this.write(
+                this.tag(
+                    "testcase",
+                    attrs,
+                    false,
+                    this.tag("skipped", {}, true),
+                ),
+            );
+        } else {
+            this.write(this.tag("testcase", attrs, true));
         }
-
-        let message = null;
-        if ("message" in err && typeof err.message === "string") {
-            message = err.message.replace(/^/gm, this.indent(3));
-        }
-
-        let stack = null;
-        if ("stack" in err && typeof err.stack === "string") {
-            stack = err.stack.replace(/^/gm, this.indent(3));
-        }
-
-        if (!message && !stack) {
-            return;
-        }
-
-        println(this.indent(1) + "---");
-        if (message) {
-            println(this.indent(2) + "message: |-");
-            println(message);
-        }
-        if (stack) {
-            println(this.indent(2) + "stack: |-");
-            println(stack);
-        }
-        println(this.indent(1) + "...");
     }
 
-    private indent(level: number): string {
-        return Array(level + 1).join("  ");
+    private tag(
+        name: string,
+        attrs: { [_: string]: string },
+        close: boolean,
+        content?: string,
+    ) {
+        const end = close ? "/>" : ">";
+        const pairs = [];
+        let tag;
+
+        for (const key in attrs) {
+            if (Object.prototype.hasOwnProperty.call(attrs, key)) {
+                pairs.push(key + '="' + escape(attrs[key]) + '"');
+            }
+        }
+
+        tag = "<" + name + (pairs.length ? " " + pairs.join(" ") : "") + end;
+        if (content) {
+            tag += content + "</" + name + end;
+        }
+        return tag;
     }
 }
