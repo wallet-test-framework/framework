@@ -1,6 +1,7 @@
 # Wallet Test Framework
 
-[blog](https://wtf.allwallet.dev/)
+- [blog](https://wtf.allwallet.dev/)
+- [documentation](https://wallet-test-framework.github.io/framework/)
 
 ## Friends of Wallet Test Framework
 
