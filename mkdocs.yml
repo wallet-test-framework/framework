@@ -1,0 +1,24 @@
+site_name: Wallet Test Framework
+site_url: https://wallet-test-framework.github.io/framework
+theme:
+    logo: img/logo.svg
+    favicon: img/logo.svg
+    name: material
+    features:
+        - content.code.copy
+repo_url: https://github.com/wallet-test-framework/framework
+extra:
+    homepage: https://wtf.allwallet.dev
+copyright: Copyright &copy; 2024 Binary Cake Ltd. - <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>
+markdown_extensions:
+    - pymdownx.highlight:
+          anchor_linenums: true
+          line_spans: __span
+          pygments_lang_class: true
+    - pymdownx.inlinehilite
+    - pymdownx.snippets
+    - pymdownx.superfences
+    - admonition
+
+plugins:
+    - mkdocs-nav-weight
