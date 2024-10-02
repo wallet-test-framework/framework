@@ -13,7 +13,7 @@ const options = {
 
     entryPoints: ["src/index.ts", "src/worker_chain.ts", "src/index.html"],
 
-    inject: ["src/shim-process.js"],
+    inject: ["src/shim-process.js", "src/shim-buffer.js"],
     loader: { ".html": "copy" },
 
     bundle: true,
