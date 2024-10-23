@@ -1,4 +1,4 @@
-import { Provider } from "@remix-project/remix-simulator/src/provider";
+import { Provider } from "@remix-project/remix-simulator";
 
 function onConfigure(evt: MessageEvent): void {
     removeEventListener("message", onConfigure);
@@ -7,14 +7,17 @@ function onConfigure(evt: MessageEvent): void {
     // message data conforms to the options type from provider.
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const provider = new Provider(evt.data);
+    provider.init()
     addEventListener("message", (evt) => onMessage(provider, evt));
 }
 
 function onMessage(provider: Provider, evt: MessageEvent): void {
     const reply = evt.ports[0];
-    let promise = new Promise<void>((res) => res());
-    if (!provider.initialized) {
-        promise = provider.init();
+    let promise
+    if (provider.initializing) {
+        promise = new Promise<void>((res) => setTimeout(() => { res() }, 5000));
+    } else {
+        promise = new Promise<void>((res) => res());
     }
     promise
         .then(() =>

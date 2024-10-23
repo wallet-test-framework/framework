@@ -5,6 +5,8 @@ import * as path from "node:path";
 import process from "node:process";
 import { URL, fileURLToPath, pathToFileURL } from "node:url";
 import solc from "solc";
+import pkg from 'esbuild-plugins-node-modules-polyfill'
+const { nodeModulesPolyfillPlugin } = pkg
 
 const options = {
     plugins: [typecheckPlugin()],
@@ -22,8 +24,10 @@ const options = {
     target: "es2020",
     format: "esm",
     platform: "browser",
-    minify: false,
+    minify: true,
     sourcemap: true,
+    plugins: [nodeModulesPolyfillPlugin()],
+    keepNames: true
 };
 
 async function buildSolidity() {

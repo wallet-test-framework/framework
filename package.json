@@ -52,7 +52,7 @@
     },
     "devDependencies": {
         "@jgoz/esbuild-plugin-typecheck": "^3.1.1",
-        "@remix-project/remix-simulator": "^0.2.57",
+        "@remix-project/remix-simulator": "/home/yann/Remix/remix-project/dist/libs/remix-simulator",
         "@trivago/prettier-plugin-sort-imports": "^4.3.0",
         "@tsconfig/recommended": "^1.0.3",
         "@types/cors": "^2.8.17",
@@ -69,6 +69,7 @@
         "buffer": "^6.0.3",
         "crypto-browserify": "^3.12.0",
         "esbuild": "0.20.1",
+        "esbuild-plugins-node-modules-polyfill": "^1.6.7",
         "eslint": "8.57.0",
         "eslint-config-prettier": "^9.1.0",
         "mocha": "^10.3.0",
