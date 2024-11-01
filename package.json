@@ -52,6 +52,7 @@
     },
     "devDependencies": {
         "@jgoz/esbuild-plugin-typecheck": "^3.1.1",
+        "@remix-project/remix-simulator": "/home/yann/Remix/remix-project/dist/libs/remix-simulator",
         "@trivago/prettier-plugin-sort-imports": "^4.3.0",
         "@tsconfig/recommended": "^1.0.3",
         "@types/cors": "^2.8.17",
@@ -64,15 +65,19 @@
         "@wallet-test-framework/glue": "^0.8.0",
         "@walletconnect/ethereum-provider": "^2.14.0",
         "assert": "^2.1.0",
+        "browserify-zlib": "^0.2.0",
+        "buffer": "^6.0.3",
+        "crypto-browserify": "^3.12.0",
         "esbuild": "0.20.1",
+        "esbuild-plugins-node-modules-polyfill": "^1.6.7",
         "eslint": "8.57.0",
         "eslint-config-prettier": "^9.1.0",
-        "ganache": "7.9.0",
         "mocha": "^10.3.0",
         "prettier": "3.2.5",
         "process": "^0.11.10",
         "rpc-websockets": "^7.9.0",
         "solc": "0.8.24",
+        "stream-browserify": "^3.0.0",
         "typescript": "^5.4.2",
         "viem": "^2.7.20"
     },
@@ -83,5 +88,14 @@
         "raw-body": "^2.5.2",
         "serve-static": "^1.15.0",
         "ws": "^8.16.0"
+    },
+    "browser": {
+        "buffer": "./node_modules/buffer",
+        "stream": false,
+        "zlib": false,
+        "crypto": false,
+        "url": false,
+        "http": false,
+        "https": false
     }
 }
