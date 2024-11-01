@@ -365,6 +365,10 @@ function main() {
         spawn(async () => await run(window.ethereum)),
     );
 
+    walletconnect.addEventListener("click", () => {
+        const audio = document.getElementById("audio") as HTMLAudioElement;
+        audio.play().catch((e) => alert(e));
+    });
     walletconnect.addEventListener(
         "click",
         spawn(async () => {
