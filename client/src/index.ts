@@ -385,7 +385,7 @@ function main() {
 
                 rpcMap: rpcMap,
             });
-            spawn(async () => await provider.connect())();
+            await provider.connect();
 
             await run(provider);
         }),
