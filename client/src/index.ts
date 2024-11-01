@@ -365,9 +365,10 @@ function main() {
         spawn(async () => await run(window.ethereum)),
     );
 
-    walletconnect.addEventListener(
-        "click",
-        spawn(async () => {
+    walletconnect.addEventListener("click", () => {
+        const audio = document.getElementById("audio") as HTMLAudioElement;
+        audio.play().catch((e) => alert(e));
+        return spawn(async () => {
             const rpcMap: { [key: string]: string } = {};
             rpcMap[chainId.toString()] = rpcUrl.href;
             const provider = await EthereumProvider.init({
@@ -388,8 +389,8 @@ function main() {
             await provider.connect();
 
             await run(provider);
-        }),
-    );
+        });
+    });
 }
 
 main();
