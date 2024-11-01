@@ -385,6 +385,7 @@ function main() {
 
                 rpcMap: rpcMap,
             });
+
             await provider.connect();
 
             await run(provider);
