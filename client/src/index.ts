@@ -289,11 +289,6 @@ function main() {
         const open = spawn(async () => {
             webSocket?.removeEventListener("open", open);
 
-            await glue.activateChain({
-                chainId: "0x" + chainId.toString(16),
-                rpcUrl: rpcUrl.href,
-            });
-
             let requestAccountsPromise: unknown = null;
             const unsubscribe = glue.on("requestaccounts", (event) => {
                 unsubscribe();
@@ -302,6 +297,15 @@ function main() {
                     id: event.id,
                     accounts: [event.accounts[0]],
                 });
+            });
+
+            if (baseProvider instanceof EthereumProvider) {
+                await baseProvider.connect();
+            }
+
+            await glue.activateChain({
+                chainId: "0x" + chainId.toString(16),
+                rpcUrl: rpcUrl.href,
             });
 
             await unboundWallet.wallet.requestAddresses();
@@ -385,7 +389,6 @@ function main() {
 
                 rpcMap: rpcMap,
             });
-            await provider.connect();
 
             await run(provider);
         }),
