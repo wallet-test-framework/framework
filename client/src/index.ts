@@ -131,6 +131,10 @@ function main() {
 
         const transport = viem.custom(provider);
 
+        if (baseProvider instanceof EthereumProvider) {
+            await baseProvider.connect();
+        }
+
         const blockchain: TestChain = {
             provider,
             wallet: viem.createWalletClient({
@@ -298,10 +302,6 @@ function main() {
                     accounts: [event.accounts[0]],
                 });
             });
-
-            if (baseProvider instanceof EthereumProvider) {
-                await baseProvider.connect();
-            }
 
             await glue.activateChain({
                 chainId: "0x" + chainId.toString(16),
