@@ -40,6 +40,12 @@ class GanacheWorkerProvider implements Eip1193Provider {
     constructor(options: object) {
         const url = new URL("./worker_chain.js", import.meta.url);
         this.worker = new Worker(url);
+        this.worker.addEventListener("error", (event) => {
+            console.error("worker thread error", event);
+        });
+        this.worker.addEventListener("messageerror", (event) => {
+            console.error("worker thread message error", event);
+        });
         this.worker.postMessage(options);
     }
 
