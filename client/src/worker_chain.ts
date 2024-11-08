@@ -1,5 +1,7 @@
 import Ganache, { EthereumProvider } from "ganache";
 
+debugger; // eslint-disable-line no-debugger
+
 function onConfigure(evt: MessageEvent): void {
     removeEventListener("message", onConfigure);
 
