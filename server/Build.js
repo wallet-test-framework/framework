@@ -17,6 +17,7 @@ const options = {
     platform: "node",
     minify: true,
     sourcemap: true,
+    keepNames: true
 };
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
