@@ -137,10 +137,6 @@ function main() {
 
         const transport = viem.custom(provider);
 
-        if (baseProvider instanceof EthereumProvider) {
-            await baseProvider.connect();
-        }
-
         const blockchain: TestChain = {
             provider,
             wallet: viem.createWalletClient({
@@ -194,6 +190,20 @@ function main() {
             }
 
             glue = new ManualGlue(glueElem, unboundWallet);
+        }
+
+        let requestAccountsPromise: unknown = null;
+        const unsubscribe = glue.on("requestaccounts", (event) => {
+            unsubscribe();
+            requestAccountsPromise = glue.requestAccounts({
+                action: "approve",
+                id: event.id,
+                accounts: [event.accounts[0]],
+            });
+        });
+
+        if (baseProvider instanceof EthereumProvider) {
+            await baseProvider.connect();
         }
 
         const wsUrl = new URL(`./${uuid}`, window.location.href);
@@ -298,16 +308,6 @@ function main() {
 
         const open = spawn(async () => {
             webSocket?.removeEventListener("open", open);
-
-            let requestAccountsPromise: unknown = null;
-            const unsubscribe = glue.on("requestaccounts", (event) => {
-                unsubscribe();
-                requestAccountsPromise = glue.requestAccounts({
-                    action: "approve",
-                    id: event.id,
-                    accounts: [event.accounts[0]],
-                });
-            });
 
             await glue.activateChain({
                 chainId: "0x" + chainId.toString(16),
